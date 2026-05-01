@@ -119,18 +119,16 @@ export default function Login() {
         {/* --- Mock Bounding Boxes --- */}
         <div style={{ 
           position: 'absolute', top: '15%', right: '8%', width: '120px', height: '80px', 
-          border: '2px solid #22c55e', zIndex: 1, boxShadow: '0 0 15px rgba(34,197,94,0.2)', pointerEvents: 'none',
-          backgroundImage: 'url("https://images.unsplash.com/photo-1629851609100-3023e98b7921?auto=format&fit=crop&w=200&q=80")',
-          backgroundSize: 'cover', backgroundPosition: 'center'
+          border: '2px solid #22c55e', zIndex: 1, boxShadow: '0 0 15px rgba(34,197,94,0.2)', pointerEvents: 'none'
         }}>
+          <img src="https://images.unsplash.com/photo-1533422902779-dac2398294a0?auto=format&fit=crop&w=300&q=80" alt="Mouse" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -1, filter: 'brightness(1.2)' }} />
           <div style={{ position: 'absolute', top: '-24px', left: '-2px', backgroundColor: '#22c55e', color: '#0f172a', padding: '2px 8px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap' }}>Mouse (id: 42)</div>
         </div>
         <div style={{ 
           position: 'absolute', bottom: '30%', right: '12%', width: '180px', height: '120px', 
-          border: '2px solid #22c55e', zIndex: 1, boxShadow: '0 0 15px rgba(34,197,94,0.2)', pointerEvents: 'none',
-          backgroundImage: 'url("https://images.unsplash.com/photo-1596783057134-2e917d23a7e0?auto=format&fit=crop&w=300&q=80")',
-          backgroundSize: 'cover', backgroundPosition: 'center'
+          border: '2px solid #22c55e', zIndex: 1, boxShadow: '0 0 15px rgba(34,197,94,0.2)', pointerEvents: 'none'
         }}>
+          <img src="https://images.unsplash.com/photo-1518552684841-860fbc358af2?auto=format&fit=crop&w=300&q=80" alt="Gecko" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -1, filter: 'brightness(1.2)' }} />
           <div style={{ position: 'absolute', top: '-24px', left: '-2px', backgroundColor: '#22c55e', color: '#0f172a', padding: '2px 8px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap' }}>Gecko (id: 10)</div>
         </div>
         <div style={{ position: 'absolute', top: '28%', right: '28%', width: '60px', height: '40px', border: '2px solid rgba(34,197,94,0.4)', zIndex: 1, pointerEvents: 'none' }}></div>
