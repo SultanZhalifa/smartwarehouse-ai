@@ -99,40 +99,20 @@ export default function Login() {
       backgroundColor: '#f8fafc'
     }}>
 
-      {/* ─── Left: Immersive Branding ─── */}
+      {/* ─── Left: Branding ─── */}
       <div style={{
-        flex: '0 0 50%', display: 'flex', flexDirection: 'column',
+        flex: '0 0 50%', backgroundColor: '#0f1115', display: 'flex', flexDirection: 'column',
         justifyContent: 'space-between', padding: '3.5rem', position: 'relative', overflow: 'hidden'
       }}>
-        {/* Background Image & Overlay */}
+        {/* Subtle gradient orb */}
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 0,
-          backgroundImage: 'url("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80")',
-          backgroundSize: 'cover', backgroundPosition: 'center',
-          filter: 'grayscale(20%) contrast(110%) brightness(80%)'
+          position: 'absolute', top: '-20%', right: '-15%', width: '600px', height: '600px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%)', pointerEvents: 'none'
         }} />
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 1,
-          background: 'linear-gradient(90deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.85) 40%, rgba(15,23,42,0.4) 100%)'
+          position: 'absolute', bottom: '-10%', left: '-10%', width: '400px', height: '400px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%)', pointerEvents: 'none'
         }} />
-
-        {/* --- Mock Bounding Boxes --- */}
-        <div style={{ 
-          position: 'absolute', top: '15%', right: '8%', width: '120px', height: '80px', 
-          border: '2px solid #22c55e', zIndex: 1, boxShadow: '0 0 15px rgba(34,197,94,0.2)', pointerEvents: 'none'
-        }}>
-          <img src="https://images.unsplash.com/photo-1533422902779-dac2398294a0?auto=format&fit=crop&w=300&q=80" alt="Mouse" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -1, filter: 'brightness(1.2)' }} />
-          <div style={{ position: 'absolute', top: '-24px', left: '-2px', backgroundColor: '#22c55e', color: '#0f172a', padding: '2px 8px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap' }}>Mouse (id: 42)</div>
-        </div>
-        <div style={{ 
-          position: 'absolute', bottom: '30%', right: '12%', width: '180px', height: '120px', 
-          border: '2px solid #22c55e', zIndex: 1, boxShadow: '0 0 15px rgba(34,197,94,0.2)', pointerEvents: 'none'
-        }}>
-          <img src="https://images.unsplash.com/photo-1518552684841-860fbc358af2?auto=format&fit=crop&w=300&q=80" alt="Gecko" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -1, filter: 'brightness(1.2)' }} />
-          <div style={{ position: 'absolute', top: '-24px', left: '-2px', backgroundColor: '#22c55e', color: '#0f172a', padding: '2px 8px', fontSize: '0.75rem', fontWeight: '800', whiteSpace: 'nowrap' }}>Gecko (id: 10)</div>
-        </div>
-        <div style={{ position: 'absolute', top: '28%', right: '28%', width: '60px', height: '40px', border: '2px solid rgba(34,197,94,0.4)', zIndex: 1, pointerEvents: 'none' }}></div>
-        {/* --------------------------- */}
         
         {/* Top: wordmark */}
         <div style={{ position: 'relative', zIndex: 2 }}>
@@ -155,20 +135,20 @@ export default function Login() {
 
           {/* Animal Detection Log Terminal */}
           <div style={{
-            backgroundColor: 'rgba(15, 23, 42, 0.65)', border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '12px', padding: '1.25rem', marginBottom: '2.5rem', backdropFilter: 'blur(12px)',
-            maxWidth: '380px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)'
+            backgroundColor: '#151b2b', border: '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px', padding: '1.25rem', marginBottom: '2.5rem',
+            maxWidth: '440px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <span style={{ color: '#f8fafc', fontWeight: '700', fontSize: '0.85rem' }}>Animal Detection Log</span>
-              <span style={{ backgroundColor: 'rgba(34, 197, 94, 0.15)', color: '#4ade80', padding: '4px 8px', borderRadius: '6px', fontSize: '0.65rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.05em' }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#4ade80', animation: 'pulse 2s infinite' }} /> SYSTEM ACTIVE
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <span style={{ color: '#ffffff', fontWeight: '700', fontSize: '1rem', letterSpacing: '-0.02em' }}>Animal Detection Log</span>
+              <span style={{ backgroundColor: '#064e3b', color: '#34d399', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.05em' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#34d399', animation: 'pulse 2s infinite' }} /> SYSTEM ACTIVE
               </span>
             </div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div><span style={{ color: '#64748b', marginRight: '12px' }}>10:14:02</span> Mouse detected - Tier 3</div>
-              <div><span style={{ color: '#64748b', marginRight: '12px' }}>10:14:03</span> Gecko detected - Tier 1</div>
-              <div><span style={{ color: '#64748b', marginRight: '12px' }}>10:14:05</span> <span style={{ color: '#cbd5e1' }}>Confirmed activity - 2 animals</span></div>
+            <div style={{ fontFamily: '"Fira Code", "Courier New", monospace', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div><span style={{ color: '#475569', marginRight: '16px' }}>10:14:02</span> <span style={{ color: '#cbd5e1' }}>Mouse detected - Tier 3</span></div>
+              <div><span style={{ color: '#475569', marginRight: '16px' }}>10:14:03</span> <span style={{ color: '#cbd5e1' }}>Gecko detected - Tier 1</span></div>
+              <div><span style={{ color: '#475569', marginRight: '16px' }}>10:14:05</span> <span style={{ color: '#ffffff', fontWeight: '500' }}>Confirmed activity - 2 animals</span></div>
             </div>
           </div>
 
