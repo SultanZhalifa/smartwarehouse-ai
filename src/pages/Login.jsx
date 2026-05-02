@@ -152,20 +152,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Metrics */}
-          <div style={{ display: 'flex', gap: '3rem' }}>
-            {[
-              { value: '99.2%', label: 'Detection accuracy', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
-              { value: '<50ms', label: 'Inference speed', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
-              { value: '24/7', label: 'Monitoring', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
-            ].map((m, i) => (
-              <div key={i}>
-                <div style={{ color: '#94a3b8', marginBottom: '0.5rem' }}>{m.icon}</div>
-                <div style={{ fontSize: '1.75rem', fontWeight: '800', color: '#f8fafc', letterSpacing: '-0.03em' }}>{m.value}</div>
-                <div style={{ fontSize: '0.875rem', color: '#94a3b8', fontWeight: '500', marginTop: '0.25rem' }}>{m.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Bottom: credits */}
