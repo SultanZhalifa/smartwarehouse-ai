@@ -253,11 +253,11 @@ def forgot_password(request: ForgotPasswordRequest, req: Request):
         "attempts": 0
     }
 
-    # In production, this would send an email. For demo, we return it.
+    # Since no email service is configured, we display the OTP code in the UI.
     return {
         "status": "success",
-        "message": f"Reset code sent to {request.email}.",
-        "demo_code": code  # Remove in production
+        "message": f"Reset code generated for {request.email}.",
+        "otp_code": code
     }
 
 @app.post("/api/reset-password")
@@ -453,9 +453,17 @@ def get_analytics(time_range: str = "weekly", auth: bool = Depends(verify_token)
 
 @app.get("/api/status")
 def get_status(auth: bool = Depends(verify_token)):
+    # Derive active zones from real log data (last 24h)
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT location FROM logs WHERE date=?", (today,))
+    zones = [row[0] for row in cursor.fetchall()]
+    conn.close()
+
     return {
         "status": "Active",
-        "active_zones": ["Zone A", "Zone B"],
+        "active_zones": zones if zones else ["Zone A - Live Cam"],
         "current_detections": [],
         "ai_performance": {
             "inference_time": LATEST_INFERENCE_TIME,

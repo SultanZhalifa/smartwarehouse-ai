@@ -16,7 +16,7 @@ export default function Login() {
 
   const [resetCode, setResetCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [demoCode, setDemoCode] = useState('');
+  const [otpCode, setOtpCode] = useState('');
 
   // Live detection log state
   const [detectionLogs, setDetectionLogs] = useState([]);
@@ -72,7 +72,7 @@ export default function Login() {
         });
         const data = await res.json();
         if (res.ok) {
-          setDemoCode(data.demo_code || '');
+          setOtpCode(data.otp_code || '');
           setSuccessMsg(data.message);
           setMode('reset');
         } else { setError(data.detail || 'Failed to send reset code.'); }
@@ -88,7 +88,7 @@ export default function Login() {
         const data = await res.json();
         if (res.ok) {
           setSuccessMsg(data.message);
-          setResetCode(''); setNewPassword(''); setDemoCode('');
+          setResetCode(''); setNewPassword(''); setOtpCode('');
           setMode('login');
         } else { setError(data.detail || 'Reset failed.'); }
         setIsLoading(false);
@@ -262,10 +262,10 @@ export default function Login() {
               {successMsg}
             </div>
           )}
-          {mode === 'reset' && demoCode && (
+          {mode === 'reset' && otpCode && (
             <div style={{ backgroundColor: '#f8fafc', padding: '0.875rem 1rem', borderRadius: '12px', fontSize: '0.875rem', marginBottom: '1.5rem', border: '1px solid #e2e8f0', color: '#0f172a' }}>
               <span style={{ color: '#64748b' }}>Your code: </span>
-              <span style={{ fontFamily: 'monospace', fontWeight: '800', fontSize: '1.125rem', letterSpacing: '0.2em' }}>{demoCode}</span>
+              <span style={{ fontFamily: 'monospace', fontWeight: '800', fontSize: '1.125rem', letterSpacing: '0.2em' }}>{otpCode}</span>
             </div>
           )}
 
@@ -374,47 +374,13 @@ export default function Login() {
             </button>
 
             {(mode === 'forgot' || mode === 'reset') && (
-              <button type="button" onClick={() => { setMode('login'); setError(''); setSuccessMsg(''); setDemoCode(''); }}
+              <button type="button" onClick={() => { setMode('login'); setError(''); setSuccessMsg(''); setOtpCode(''); }}
                 style={{ width: '100%', padding: '0.5rem', backgroundColor: 'transparent', color: '#64748b', border: 'none', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer', fontFamily: 'inherit' }}
               >← Back to log in</button>
             )}
           </form>
 
-          {/* Divider & SSO Mockup for aesthetics */}
-          {(mode === 'login' || mode === 'signup') && (
-            <div style={{ marginTop: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', margin: '1.5rem 0' }}>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-                <span style={{ padding: '0 0.75rem', fontSize: '0.75rem', color: '#94a3b8', fontWeight: '500' }}>or connect with</span>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-              </div>
-              
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button type="button" onClick={() => alert('SSO Demo Mode')} style={{
-                  flex: 1, padding: '0.625rem', backgroundColor: '#fff', border: '1px solid #cbd5e1',
-                  borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                  fontSize: '0.875rem', fontWeight: '500', color: '#0f172a', cursor: 'pointer', transition: 'all 0.2s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff'}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-                  GitHub
-                </button>
-                <button type="button" onClick={() => alert('SSO Demo Mode')} style={{
-                  flex: 1, padding: '0.625rem', backgroundColor: '#fff', border: '1px solid #cbd5e1',
-                  borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                  fontSize: '0.875rem', fontWeight: '500', color: '#0f172a', cursor: 'pointer', transition: 'all 0.2s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff'}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                  Google
-                </button>
-              </div>
-            </div>
-          )}
+
 
           {/* Footer */}
           <p style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.75rem', color: '#94a3b8' }}>

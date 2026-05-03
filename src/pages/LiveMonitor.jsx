@@ -7,6 +7,7 @@ export default function LiveMonitor() {
   const { addToast } = useToast();
   const [status, setStatus] = useState("Loading...");
   const [aiData, setAiData] = useState({ speed: "0ms", model: "YOLO11" });
+  const [activeZones, setActiveZones] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const prevLogCountRef = useRef(allLogs.length);
   const isCameraOnRef = useRef(false);
@@ -67,6 +68,7 @@ export default function LiveMonitor() {
             speed: (data.ai_performance?.inference_time || 0) + "ms", 
             model: data.ai_performance?.model || "YOLO11" 
           });
+          setActiveZones(data.active_zones || []);
         })
         .catch(() => setStatus("Offline"));
     };
@@ -135,7 +137,7 @@ Mohon segera lakukan pengecekan pada dashboard Smart Warehouse atau tugaskan per
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Active Zones</p>
-            <h3 style={{ margin: '0.25rem 0 0 0', fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)' }}>1 Zone</h3>
+            <h3 style={{ margin: '0.25rem 0 0 0', fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeZones.length} Zone{activeZones.length !== 1 ? 's' : ''}</h3>
           </div>
         </div>
 
