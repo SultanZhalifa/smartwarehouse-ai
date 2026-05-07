@@ -1,134 +1,256 @@
-# Smart Warehouse - Bio Hazard and Pest Detection
+# Smart Warehouse — AI-Powered Bio-Hazard & Pest Detection
 
 ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
 ![OpenCV](https://img.shields.io/badge/opencv-%23white.svg?style=for-the-badge&logo=opencv&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
 
-An automated AI surveillance system designed for PT. Kawan Lama to maintain the integrity of goods and the safety of workers from wild animal disturbances.
+> An automated AI surveillance system for PT. Kawan Lama that maintains the integrity of warehouse goods and worker safety from bio-hazard and pest intrusions — powered by a **custom-trained YOLO11 model** with real-time WebSocket alerts.
 
-This project was built for the AI Open Innovation Challenge 2026, utilizing Computer Vision (OpenCV) and a full stack React + FastAPI architecture to provide real time alerts for Snakes (Bio Hazards), Cats, and Geckos (Contamination Risks).
-
----
-
-## Agile Scrum Team (Group 5)
-
-- Product Owner: Risly Maria Theresia Worung (001202400069)
-- Scrum Master: Sultan Zhalifunnas Musyaffa (001202400200)
-- Frontend Lead Developer: Misha Andalusia (001202400040)
-- Backend and AI Lead Developer: Fathir Barhouti Awlya (001202400054)
+**Built for the AI Open Innovation Challenge 2026**
 
 ---
 
-## Features
+## Key Features
 
-- Live Video Simulator: Real time MJPEG video streaming from the Python backend via OpenCV with dynamic bounding boxes highlighting animal threats directly on the video feed.
-- Interactive Warehouse Zone Map: SVG based floor plan with color coded threat levels (High Alert, Moderate, Clear), clickable zones showing camera status and recent detections, and pulse animations for high risk areas.
-- Risk Assessment Matrix: Professional threat classification table categorizing each animal type by severity, likelihood, and risk score with recommended response actions.
-- Executive Summary with PDF Export: Comprehensive risk mitigation report with one click PDF generation for management reporting, powered by jsPDF and html2canvas.
-- Detection Logs with Advanced Filtering: Full detection history table with search bar, risk level filter tabs (All, Hazard, Contamination, Authorized), summary stat cards, and CSV export functionality.
-- Rapid Response Protocols: Detailed step by step Standard Operating Procedures for handling Snake (Bio Hazard), Cat (Contamination), and Gecko (Monitoring) detections.
-- Real Time Push Notifications: WebSocket powered instant alerts with toast notifications and WhatsApp/Telegram sharing integration.
-- Weekly Detection Trend Analytics: Stacked bar charts and donut charts visualizing detection patterns across all warehouse zones powered by Recharts.
-- System Architecture Dashboard: Visual pipeline diagram showing the full technology flow from Camera to AI to Dashboard, with detailed tech specifications.
-- Session Based Authentication: Secure login system with session storage that requires re authentication on every new browser session.
+| Feature | Description |
+|---------|-------------|
+| **Real-Time AI Detection** | Custom YOLO11 model trained on Snake, Cat, and Gecko datasets with HUD-style bounding boxes |
+| **Live Video Streaming** | MJPEG video feed via OpenCV with sub-50ms inference latency |
+| **3-Tier Risk Classification** | Bio-Hazard (Snake) → Contamination (Cat) → Monitoring (Gecko/Lizard) |
+| **WebSocket Push Alerts** | Instant notifications with auto-reconnect and exponential backoff |
+| **TTS Audio Alerts** | Indonesian voice warnings via Windows Speech Synthesis |
+| **Interactive Zone Map** | SVG warehouse floor plan with color-coded threat heatmap |
+| **Analytics Dashboard** | Trend charts, risk distribution, and zone activity powered by Recharts |
+| **PDF Export** | One-click executive summary report generation (jsPDF + html2canvas) |
+| **CSV Log Export** | Full detection history export with timestamps and confidence scores |
+| **Session Auth** | Secure login with bcrypt hashing and 24h token expiry |
+
+---
+
+## Architecture
+
+```
+┌─────────────┐    ┌──────────────┐    ┌──────────┐    ┌──────────┐    ┌───────────┐    ┌──────────────┐
+│ Camera/RTSP │───▶│  YOLO11 AI   │───▶│ FastAPI  │───▶│  SQLite  │───▶│ WebSocket │───▶│   React UI   │
+│  (OpenCV)   │    │ (Inference)  │    │ (API)    │    │   (DB)   │    │(Real-time)│    │ (Dashboard)  │
+└─────────────┘    └──────────────┘    └──────────┘    └──────────┘    └───────────┘    └──────────────┘
+```
+
+### Backend Module Architecture (v2.0)
+
+```
+backend/
+├── app.py                      ← Application entry point (~90 lines)
+├── config.py                   ← Constants, env vars, shared state
+├── database.py                 ← Thread-safe SQLite with WAL mode
+├── .env                        ← Environment variables
+├── routes/
+│   ├── auth.py                 ← Login, Register, Password Reset (bcrypt)
+│   ├── logs.py                 ← Detection logs CRUD + CSV export
+│   ├── settings.py             ← System settings management
+│   ├── analytics.py            ← Charts, heatmap, system status
+│   └── camera.py               ← Camera control + video streaming + AI inference
+├── services/
+│   ├── detector.py             ← YOLO11 model loading + HUD bounding box renderer
+│   ├── websocket_manager.py    ← Thread-safe WebSocket broadcasting
+│   └── tts.py                  ← Text-to-speech alerts with cooldown
+├── tests/
+│   └── test_api.py             ← 14 automated API tests (pytest)
+├── train_custom_model.py       ← Custom YOLO training pipeline
+└── main.py                     ← Backward compatibility wrapper
+```
 
 ---
 
 ## Tech Stack
 
-- Frontend: React 19, Vite 8, React Router DOM, Recharts 3, Vanilla CSS
-- Backend: Python, FastAPI, Uvicorn
-- AI/Vision: YOLO11 Nano (Ultralytics), OpenCV 4 (cv2), NumPy
-- Database: SQLite3
-- Real time: WebSocket (Bi directional)
-- Report Export: jsPDF, html2canvas
-- Alerts: pyttsx3 (Text to Speech)
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 19, Vite 8, React Router DOM 7, Recharts 3, Vanilla CSS |
+| **Backend** | Python 3.12, FastAPI, Uvicorn, Pydantic |
+| **AI/Vision** | YOLO11-Nano (Ultralytics), OpenCV 4, NumPy |
+| **Security** | bcrypt (password hashing), python-dotenv (env vars), rate limiting |
+| **Database** | SQLite3 with WAL mode (thread-safe) |
+| **Real-time** | WebSocket (bi-directional) with exponential backoff |
+| **Testing** | pytest, httpx, FastAPI TestClient |
+| **Export** | jsPDF, html2canvas, CSV streaming |
 
 ---
 
-## System Architecture
+## Getting Started
 
-```
-Camera/Video --> YOLO11 AI --> FastAPI --> SQLite --> WebSocket --> React Dashboard
-  (OpenCV)     (Inference)   (Backend)  (Database)  (Real-time)   (Frontend UI)
-```
+### Prerequisites
 
----
+- Python 3.12+
+- Node.js 18+
+- Webcam (optional — supports RTSP/video file input)
 
-## How to Run Locally
+### 1. Backend Setup
 
-To run this project, you will need two terminals running simultaneously (one for the backend, one for the frontend).
-
-### 1. Start the Python AI Backend
 ```bash
-# Navigate to the backend directory
 cd backend
 
-# Create a virtual environment (Windows)
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Run the FastAPI server
-uvicorn main:app --reload
+# Configure environment (optional)
+cp .env.example .env  # Edit values as needed
+
+# Start the API server
+python -m uvicorn app:app --port 8000
 ```
-The backend will run on http://127.0.0.1:8000
 
-### 2. Start the React Frontend Dashboard
+> Backend runs on http://127.0.0.1:8000 — API docs available at http://127.0.0.1:8000/docs
+
+### 2. Frontend Setup
+
 ```bash
-# Open a new terminal and stay in the root directory
-# Install Node dependencies
+# From project root
 npm install
-
-# Start the Vite development server
 npm run dev
 ```
-The dashboard will be available at http://localhost:5173. Vite will automatically proxy API requests to the Python backend.
 
-### Default Login Credentials
-- Email: manager@kawanlama.com
-- Password: password123
+> Dashboard available at http://localhost:5173
+
+### 3. Run Tests
+
+```bash
+cd backend
+python -m pytest tests/ -v
+```
+
+### Default Credentials
+
+The system seeds 3 users on first run with role-based access (RBAC):
+
+| Username | Role | Access |
+|----------|------|--------|
+| `admin` | Admin | Full access (User Management, Settings, Live Monitor, Logs) |
+| `manager` | Manager | Settings, Live Monitor, Logs, Analytics |
+| `operator` | Operator | Live Monitor, Logs (read-only) |
+
+> **Default passwords** are seeded on first DB initialization. Check `backend/database.py` for the seed values, or contact the project owner.
+>
+> **Important:** All users are required to change their password on first login. Change defaults immediately after deployment.
+
+### AI Model Weights
+
+The custom-trained YOLO11 model (`warehouse_pest.pt`) is **not committed to git** (~6MB binary). You have two options:
+
+**Option A — Use base YOLO11 model (general-purpose):**
+The system auto-falls-back to `yolo11n.pt` (downloaded by Ultralytics on first run). Limited accuracy for pest classes.
+
+**Option B — Train your own custom model:**
+```bash
+cd backend
+set ROBOFLOW_API_KEY=your_key_from_roboflow.com
+python download_datasets.py
+python train_custom_model.py
+```
+See [`TRAINING_GUIDE.md`](TRAINING_GUIDE.md) for details.
+
+### Demo Videos
+
+Place demo videos in `backend/demo_videos/` (also not committed):
+- `Cat.mp4` → Zone B
+- `Gecko.mp4` → Zone C
+- `Snake.mp4` → Zone D
+
+See [`backend/demo_videos/README.md`](backend/demo_videos/README.md) for sources.
+
+### 4. Docker Deployment (One Command)
+
+> **Prerequisites:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+
+```bash
+# From project root
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| **Backend API** | http://localhost:8000 |
+| **API Docs (Swagger)** | http://localhost:8000/docs |
+| **Frontend Dashboard** | http://localhost:5173 |
+| **Health Check** | http://localhost:8000/api/health |
+| **Model Info** | http://localhost:8000/api/model-info |
+
+```bash
+# Stop all services
+docker compose down
+
+# View live logs
+docker compose logs -f backend
+```
+
+> **Note:** Webcam access is not available inside Docker containers on Windows. For camera demos in Docker, set the camera source to an RTSP URL or video file path via the Settings page.
 
 ---
 
-## Project Structure
+## Custom AI Model Training
 
-```
-smart-warehouse-dashboard/
-  backend/
-    main.py              # FastAPI server with YOLO inference, WebSocket, and all API routes
-    requirements.txt     # Python dependencies
-  src/
-    components/
-      WarehouseZoneMap.jsx  # Interactive SVG warehouse floor plan
-    context/
-      WarehouseContext.jsx  # Global state management (auth, logs, alerts, dark mode)
-    layouts/
-      DashboardLayout.jsx   # Sidebar navigation and top bar
-    pages/
-      Login.jsx             # Authentication page
-      LiveMonitor.jsx       # Live camera feed with real time detection
-      DetectionLogs.jsx     # Filterable detection history with CSV export
-      RiskAnalysis.jsx      # Executive summary, charts, zone map, and protocols
-      Settings.jsx          # System config, preferences, and architecture diagram
-  docs/
-    SCRUM_ROLES.md          # Agile team roles and responsibilities
-    PRODUCT_BACKLOG.md      # Product backlog items with priority
-    SPRINT_REPORTS.md       # Weekly sprint progress reports
-  public/
-    Paw.webp                # Brand logo
-```
+We trained a custom YOLO11 model (`warehouse_pest.pt`) on curated datasets from Roboflow:
+
+- **Snake Detection** — 1,200+ annotated images
+- **Cat Detection** — 800+ annotated images  
+- **Gecko/Lizard Detection** — 600+ annotated images
+
+Training details available in [`TRAINING_GUIDE.md`](TRAINING_GUIDE.md).
 
 ---
 
-## Executive Summary
+## API Endpoints
 
-Large scale warehouses face challenges with manual monitoring in blind spots. Our automated AI dashboard mitigates these risks by separating alerts into three critical tiers:
-1. Bio Hazards (Snakes): Triggers immediate halt of operations, zone lockdown, and notifies animal control. Workers must not attempt manual removal.
-2. Contamination Risks (Cats): Logs the entry point, dispatches maintenance crew for inspection and sanitization of affected goods.
-3. Monitoring (Geckos/Lizards): Records detection events, identifies and seals entry points, and schedules periodic zone inspections.
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/login` | - | User authentication |
+| `POST` | `/api/register` | - | New user registration |
+| `GET` | `/api/verify-token` | Bearer | Token validation |
+| `POST` | `/api/forgot-password` | - | OTP code generation |
+| `POST` | `/api/reset-password` | - | Password reset with OTP |
+| `GET` | `/api/settings` | - | Get system settings |
+| `POST` | `/api/settings` | Bearer | Update settings |
+| `POST` | `/api/settings/reset` | Bearer | Factory reset |
+| `GET` | `/api/logs` | Bearer | Get detection logs |
+| `DELETE` | `/api/logs` | Bearer | Clear all logs |
+| `GET` | `/api/export/logs` | Token | CSV export |
+| `GET` | `/api/analytics` | Bearer | Trend & distribution data |
+| `GET` | `/api/status` | Bearer | System status |
+| `POST` | `/api/camera/toggle` | Bearer | Start/stop camera |
+| `GET` | `/api/video_feed` | - | MJPEG video stream |
+| `WS` | `/api/ws/alerts` | - | Real-time alert notifications |
+| `GET` | `/api/health` | - | System health check (Docker) |
+| `GET` | `/api/model-info` | - | AI model metadata & capabilities |
 
-By leveraging a scalable AI driven solution, we drastically reduce manual patrol overhead while significantly improving workplace safety and goods integrity for PT. Kawan Lama.
+> Full interactive API documentation: http://127.0.0.1:8000/docs
+
+---
+
+## Agile Scrum Team (Group 5)
+
+| Role | Name | NIM |
+|------|------|-----|
+| Product Owner | Risly Maria Theresia Worung | 001202400069 |
+| Scrum Master | Sultan Zhalifunnas Musyaffa | 001202400200 |
+| Frontend Lead | Misha Andalusia | 001202400040 |
+| Backend & AI Lead | Fathir Barhouti Awlya | 001202400054 |
+
+---
+
+## Project Documentation
+
+| Document | Description |
+|----------|-------------|
+| [`docs/SCRUM_ROLES.md`](docs/SCRUM_ROLES.md) | Team roles and responsibilities |
+| [`docs/PRODUCT_BACKLOG.md`](docs/PRODUCT_BACKLOG.md) | Product backlog with priorities |
+| [`docs/SPRINT_REPORTS.md`](docs/SPRINT_REPORTS.md) | Weekly sprint progress reports |
+| [`TRAINING_GUIDE.md`](TRAINING_GUIDE.md) | Custom AI model training guide |
+
+---
+
+## License
+
+This project was developed as part of the **AI Open Innovation Challenge 2026** for PT. Kawan Lama Group.

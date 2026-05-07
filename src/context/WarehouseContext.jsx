@@ -6,37 +6,69 @@ export function useWarehouse() {
   return useContext(WarehouseContext);
 }
 
+const loadStoredUser = () => {
+  try {
+    const raw = localStorage.getItem('sw_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 export function WarehouseProvider({ children }) {
   const [alerts, setAlerts] = useState([]);
   const [logs, setLogs] = useState([]);
   const [logsLoaded, setLogsLoaded] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [authToken, setAuthToken] = useState(localStorage.getItem('sw_token'));
+  const [user, setUser] = useState(loadStoredUser);
 
-  // Sync token to localStorage with 24h TTL
-  const login = useCallback((token) => {
-    const tokenData = { token, expires: Date.now() + 86400000 }; // 24 hours
+  const login = useCallback((token, userData) => {
+    const tokenData = { token, expires: Date.now() + 86400000 }; // 24h
     localStorage.setItem('sw_token', token);
     localStorage.setItem('sw_token_meta', JSON.stringify(tokenData));
+    if (userData) {
+      localStorage.setItem('sw_user', JSON.stringify(userData));
+      setUser(userData);
+    }
     setAuthToken(token);
   }, []);
 
   const logout = useCallback(() => {
+    const token = localStorage.getItem('sw_token');
+    if (token) {
+      fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      }).catch(() => {});
+    }
     localStorage.removeItem('sw_token');
     localStorage.removeItem('sw_token_meta');
+    localStorage.removeItem('sw_user');
     setAuthToken(null);
+    setUser(null);
     setLogs([]);
     setLogsLoaded(false);
   }, []);
 
-  // On mount: check if token is expired locally, then verify with server
+  const updateUser = useCallback((patch) => {
+    setUser(prev => {
+      const next = { ...(prev || {}), ...patch };
+      localStorage.setItem('sw_user', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const hasRole = useCallback((...roles) => {
+    return user && roles.includes(user.role);
+  }, [user]);
+
+  // On mount: check token expiry locally, then verify with server
   useEffect(() => {
     const token = localStorage.getItem('sw_token');
     const meta = localStorage.getItem('sw_token_meta');
-
     if (!token) return;
 
-    // Check local expiry first
     if (meta) {
       try {
         const parsed = JSON.parse(meta);
@@ -44,25 +76,30 @@ export function WarehouseProvider({ children }) {
           logout();
           return;
         }
-      } catch { /* ignore parse errors */ }
+      } catch { /* ignore */ }
     }
 
-    // Verify token with server
     fetch('/api/verify-token', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => {
         if (!res.ok) {
           logout();
+          return null;
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data && data.user) {
+          updateUser({ username: data.user.username, role: data.user.role });
         }
       })
       .catch(() => {
-        // Server unreachable — keep token but don't force logout
         console.warn('Could not verify token — server may be offline.');
       });
-  }, [logout]);
+  }, [logout, updateUser]);
 
-  // Setup WebSocket when authenticated (dynamic URL)
+  // Setup WebSocket when authenticated
   useEffect(() => {
     if (!authToken) return;
 
@@ -79,9 +116,7 @@ export function WarehouseProvider({ children }) {
     const connect = () => {
       ws = new WebSocket(wsUrl);
 
-      ws.onopen = () => {
-        reconnectAttempts = 0;
-      };
+      ws.onopen = () => { reconnectAttempts = 0; };
 
       ws.onmessage = (event) => {
         try {
@@ -94,7 +129,6 @@ export function WarehouseProvider({ children }) {
             setAlerts(prev => prev.filter(a => a.id !== alertId));
           }, 5000);
 
-          // Automatically add to logs
           setLogs(prev => [newAlert, ...prev]);
         } catch (e) {
           console.error('Failed to parse WebSocket message:', e);
@@ -102,15 +136,12 @@ export function WarehouseProvider({ children }) {
       };
 
       ws.onclose = () => {
-        // Auto-reconnect with exponential backoff
         const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), maxReconnectDelay);
         reconnectAttempts++;
         reconnectTimer = setTimeout(connect, delay);
       };
 
-      ws.onerror = () => {
-        ws.close();
-      };
+      ws.onerror = () => { ws.close(); };
     };
 
     connect();
@@ -125,7 +156,6 @@ export function WarehouseProvider({ children }) {
   useEffect(() => {
     if (!authToken) return;
 
-    // Fetch initial logs
     fetch('/api/logs', {
       headers: { 'Authorization': `Bearer ${authToken}` }
     })
@@ -138,21 +168,25 @@ export function WarehouseProvider({ children }) {
         setLogsLoaded(true);
       })
       .catch(() => {
-        setLogsLoaded(true); // Mark as loaded even on error to prevent infinite loading
+        setLogsLoaded(true);
       });
 
-    // Fetch settings for dark mode
-    fetch('/api/settings')
-      .then(res => res.json())
+    fetch('/api/settings', {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Settings unavailable');
+        return res.json();
+      })
       .then(data => {
-        if (data.darkMode !== undefined) {
+        if (data && data.darkMode !== undefined) {
           setDarkMode(data.darkMode);
           document.body.classList.toggle('dark-mode', data.darkMode);
         }
-      });
+      })
+      .catch(() => { /* ignore — backend may be offline */ });
   }, [authToken]);
 
-  // Global Dark Mode Toggle
   const toggleDarkMode = (isDark) => {
     setDarkMode(isDark);
     document.body.classList.toggle('dark-mode', isDark);
@@ -160,7 +194,9 @@ export function WarehouseProvider({ children }) {
 
   return (
     <WarehouseContext.Provider value={{
-      alerts, logs, setLogs, logsLoaded, darkMode, toggleDarkMode, authToken, login, logout
+      alerts, logs, setLogs, logsLoaded,
+      darkMode, toggleDarkMode,
+      authToken, user, login, logout, updateUser, hasRole,
     }}>
       {children}
     </WarehouseContext.Provider>

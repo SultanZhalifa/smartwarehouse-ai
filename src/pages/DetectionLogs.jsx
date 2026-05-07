@@ -6,7 +6,7 @@ const RISK_FILTERS = [
   { key: 'all', label: 'All Detections' },
   { key: 'danger', label: 'Hazard' },
   { key: 'warning', label: 'Contamination' },
-  { key: 'info', label: 'Authorized' },
+  { key: 'info', label: 'Monitoring' },
 ];
 
 export default function DetectionLogs() {
@@ -20,9 +20,9 @@ export default function DetectionLogs() {
   const placeholders = [
     "Search 'Snake'...",
     "Filter by 'Zone A'...",
-    "Try 'Cat' or 'Dog'...",
+    "Try 'Cat' or 'Gecko'...",
     "Search 'danger'...",
-    "Find 'Person'...",
+    "Find 'Lizard'...",
   ];
   const [placeholderText, setPlaceholderText] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -125,7 +125,7 @@ export default function DetectionLogs() {
           { label: 'Total Detections', value: totalCount, color: 'var(--text-primary)' },
           { label: 'Hazard Events', value: dangerCount, color: '#ef4444' },
           { label: 'Contamination', value: warningCount, color: '#f59e0b' },
-          { label: 'Authorized', value: infoCount, color: '#22c55e' },
+          { label: 'Monitoring', value: infoCount, color: '#22c55e' },
         ].map((stat, i) => (
           <div key={i} className="card" style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</span>
@@ -232,7 +232,7 @@ export default function DetectionLogs() {
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <span className={`alert-badge alert-${log.risk}`}>
                           <span className="status-dot"></span>
-                          {log.risk === 'danger' ? 'HAZARD' : log.risk === 'info' ? 'AUTHORIZED' : 'CONTAMINATION'}
+                          {log.risk === 'danger' ? 'HAZARD' : log.risk === 'info' ? 'MONITORING' : 'CONTAMINATION'}
                         </span>
                       </td>
                       <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{log.location}</td>

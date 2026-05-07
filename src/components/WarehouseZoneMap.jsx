@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 const ZONES = [
-  { id: 'A', label: 'Zone A', x: 5, y: 5, w: 44, h: 43, desc: 'Storage Area - High-Value Goods', camera: true },
-  { id: 'B', label: 'Zone B', x: 51, y: 5, w: 44, h: 43, desc: 'Loading Dock - Entry/Exit Point', camera: true },
-  { id: 'C', label: 'Zone C', x: 5, y: 52, w: 44, h: 43, desc: 'Cold Storage - Temperature Controlled', camera: false },
-  { id: 'D', label: 'Zone D', x: 51, y: 52, w: 44, h: 43, desc: 'Packaging Area - Worker Station', camera: false },
+  { id: 'A', label: 'Zone A', x: 5, y: 5, w: 44, h: 43, desc: 'Main Warehouse - Primary Storage', camera: true },
+  { id: 'B', label: 'Zone B', x: 51, y: 5, w: 44, h: 43, desc: 'Storage Area - Secondary Goods', camera: true },
+  { id: 'C', label: 'Zone C', x: 5, y: 52, w: 44, h: 43, desc: 'Loading Dock - Entry/Exit Point', camera: true },
+  { id: 'D', label: 'Zone D', x: 51, y: 52, w: 44, h: 43, desc: 'Entrance Gate - Access Control', camera: true },
 ];
 
 export default function WarehouseZoneMap({ zoneData = [], recentLogs = [] }) {

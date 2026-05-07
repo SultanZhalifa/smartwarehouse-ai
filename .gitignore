@@ -26,6 +26,7 @@ dist-ssr
 # Python
 backend/venv/
 backend/__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 
@@ -36,3 +37,31 @@ backend/*.db
 # Model weights (too large for git)
 backend/*.pt
 *.pt
+
+# Environment variables
+.env
+backend/.env
+
+# Training data & artifacts (too large for git)
+backend/dataset/
+backend/dataset_merged/
+backend/runs/
+
+# Demo videos (binary media; collaborators provide their own — keep README)
+backend/demo_videos/*.mp4
+backend/demo_videos/*.avi
+backend/demo_videos/*.mov
+backend/demo_videos/*.mkv
+backend/demo_videos/*.webm
+
+# OS / IDE leftovers
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Test artifacts
+backend/tests/__pycache__/
+.pytest_cache/
+
+# Snapshots downloaded by user
+backend/snapshots/

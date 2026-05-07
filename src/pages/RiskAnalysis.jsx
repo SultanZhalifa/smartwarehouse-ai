@@ -304,9 +304,8 @@ export default function RiskAnalysis() {
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
                   <Tooltip cursor={{ fill: 'var(--bg-tertiary)' }} contentStyle={{ borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px', color: 'var(--text-secondary)' }} />
-                  <Bar dataKey="Person" stackId="a" fill="var(--alert-success)" radius={[0, 0, 4, 4]} barSize={activeRange === 'monthly' ? 12 : 28} />
+                  <Bar dataKey="Gecko" stackId="a" fill="var(--alert-success)" radius={[0, 0, 4, 4]} barSize={activeRange === 'monthly' ? 12 : 28} />
                   <Bar dataKey="Cat" stackId="a" fill="var(--alert-warning)" />
-                  <Bar dataKey="Dog" stackId="a" fill="#f97316" />
                   <Bar dataKey="Snake" stackId="a" fill="var(--alert-danger)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWarehouse } from '../context/WarehouseContext';
 import { useToast } from '../components/ToastNotification';
+import CameraGrid from '../components/CameraGrid';
 
 export default function LiveMonitor() {
   const { logs: allLogs, authToken } = useWarehouse();
@@ -14,18 +15,21 @@ export default function LiveMonitor() {
 
   const [isCameraOn, setIsCameraOn] = useState(false);
 
-  // Toggle camera with error feedback
+  // Toggle Zone A camera (Main Warehouse) with error feedback
   const toggleCamera = async (turnOn) => {
     try {
-      const res = await fetch('/api/camera/toggle', {
+      const res = await fetch('/api/cameras/zone-a/toggle', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`
         },
         body: JSON.stringify({ state: turnOn })
       });
-      if (!res.ok) throw new Error('Server error');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Server error');
+      }
       setIsCameraOn(turnOn);
       isCameraOnRef.current = turnOn;
     } catch (err) {
@@ -34,12 +38,35 @@ export default function LiveMonitor() {
     }
   };
 
+  // Sync Zone A state from server so manual toggles in CameraGrid stay consistent
+  useEffect(() => {
+    if (!authToken) return;
+    const syncZoneA = () => {
+      fetch('/api/cameras', { headers: { 'Authorization': `Bearer ${authToken}` } })
+        .then(r => r.ok ? r.json() : [])
+        .then(zones => {
+          const a = zones.find(z => z.id === 'zone-a');
+          if (a) {
+            const live = a.status === 'live';
+            setIsCameraOn(live);
+            isCameraOnRef.current = live;
+          }
+        })
+        .catch(() => {});
+    };
+    syncZoneA();
+    const interval = setInterval(syncZoneA, 4000);
+    return () => clearInterval(interval);
+  }, [authToken]);
+
   // Cleanup on unmount + beforeunload backup
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (isCameraOnRef.current) {
-        // Use sendBeacon for reliable cleanup on tab close
-        navigator.sendBeacon?.('/api/camera/toggle', JSON.stringify({ state: false }));
+        navigator.sendBeacon?.(
+          '/api/cameras/zone-a/toggle',
+          new Blob([JSON.stringify({ state: false })], { type: 'application/json' })
+        );
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -236,12 +263,15 @@ Mohon segera lakukan pengecekan pada dashboard Smart Warehouse atau tugaskan per
             }}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
               <div style={{ textAlign: 'center' }}>
-                <p style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Camera is Offline</p>
-                <p style={{ fontSize: '0.875rem' }}>Click "Turn On Cam" to initiate live YOLO11 inference.</p>
+                <p style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Surveillance Inactive</p>
+                <p style={{ fontSize: '0.875rem' }}>Click "Start Cam" to begin real-time pest detection monitoring.</p>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Multi-Zone Camera Grid */}
+        <CameraGrid />
       </div>
 
       {/* Right Column: Alerts */}
@@ -269,7 +299,7 @@ Mohon segera lakukan pengecekan pada dashboard Smart Warehouse atau tugaskan per
                   <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>{log.type}</h4>
                   <span className={`alert-badge alert-${log.risk}`} style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem' }}>
                     <span className="status-dot"></span>
-                    {log.risk === 'danger' ? 'HAZARD' : log.risk === 'info' ? 'AUTHORIZED' : 'CONTAMINATION'}
+                    {log.risk === 'danger' ? 'HAZARD' : log.risk === 'info' ? 'MONITORING' : 'CONTAMINATION'}
                   </span>
                 </div>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>

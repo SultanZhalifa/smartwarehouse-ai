@@ -5,7 +5,8 @@ export default function Settings() {
   const { authToken, darkMode, toggleDarkMode, setLogs } = useWarehouse();
   
   const [cameraUrl, setCameraUrl] = useState('0');
-  const [threshold, setThreshold] = useState(85);
+  const [cameraZone, setCameraZone] = useState('Zone A');
+  const [threshold, setThreshold] = useState(50);
   const [notifications, setNotifications] = useState(true);
   
   const [isSaving, setIsSaving] = useState(false);
@@ -20,6 +21,7 @@ export default function Settings() {
       .then(res => res.json())
       .then(data => {
         if (data.cameraUrl) setCameraUrl(data.cameraUrl);
+        if (data.cameraZone) setCameraZone(data.cameraZone);
         if (data.threshold) setThreshold(data.threshold);
         if (data.notifications !== undefined) setNotifications(data.notifications);
         // darkMode is handled globally by Context
@@ -34,7 +36,7 @@ export default function Settings() {
   const handleSave = async () => {
     // Validate camera URL
     if (cameraUrl !== '0' && cameraUrl !== '1' && !cameraUrl.match(/^(rtsp|http|https):\/\//) && !cameraUrl.match(/\.(mp4|avi|mov|mkv)$/i)) {
-      setToastMsg('⚠️ Camera source must be 0, 1, an RTSP/HTTP URL, or a video file path.');
+      setToastMsg('Warning: Camera source must be 0, 1, an RTSP/HTTP URL, or a video file path.');
       setTimeout(() => setToastMsg(''), 5000);
       return;
     }
@@ -49,7 +51,7 @@ export default function Settings() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`
         },
-        body: JSON.stringify({ cameraUrl, threshold, notifications, darkMode })
+        body: JSON.stringify({ cameraUrl, cameraZone, threshold, notifications, darkMode })
       });
 
       if (response.ok) {
@@ -57,12 +59,12 @@ export default function Settings() {
         setToastMsg(data.message || 'Settings saved successfully.');
         setTimeout(() => setToastMsg(''), 4000);
       } else {
-        setToastMsg('⚠️ Failed to save settings. Please try again.');
+        setToastMsg('Error: Failed to save settings. Please try again.');
         setTimeout(() => setToastMsg(''), 4000);
       }
     } catch (err) {
       console.error("Failed to save settings", err);
-      setToastMsg('⚠️ Server unreachable. Please check your connection.');
+      setToastMsg('Error: Server unreachable. Please check your connection.');
       setTimeout(() => setToastMsg(''), 4000);
     } finally {
       setIsSaving(false);
@@ -158,7 +160,31 @@ export default function Settings() {
                 Use <code style={{ backgroundColor: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: 4, fontSize: '0.7rem' }}>0</code> for default webcam, or paste an RTSP/HTTP stream URL or local <code style={{ backgroundColor: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: 4, fontSize: '0.7rem' }}>.mp4</code> file path.
               </p>
             </div>
-            
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Camera Zone</label>
+              <select
+                value={cameraZone}
+                onChange={(e) => setCameraZone(e.target.value)}
+                style={{
+                  width: '100%', padding: '0.875rem 1.25rem', borderRadius: '12px',
+                  border: '1px solid var(--border-color)', outline: 'none', fontSize: '0.95rem',
+                  color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)',
+                  cursor: 'pointer', appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center',
+                }}
+              >
+                <option value="Zone A">Zone A</option>
+                <option value="Zone B">Zone B</option>
+                <option value="Zone C">Zone C</option>
+                <option value="Zone D">Zone D</option>
+              </select>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem', opacity: 0.8 }}>
+                Assign this camera feed to a warehouse zone. Detections will be logged to the selected zone.
+              </p>
+            </div>
+
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>
@@ -170,14 +196,14 @@ export default function Settings() {
               </div>
               <input 
                 type="range" 
-                min="50" max="99" 
+                min="30" max="95" 
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
                 style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--accent-primary)', height: '6px', borderRadius: '4px' }} 
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: '500' }}>
-                <span>Lenient (50%)</span>
-                <span>Strict (99%)</span>
+                <span>Sensitive (30%)</span>
+                <span>Strict (95%)</span>
               </div>
             </div>
           </div>
@@ -222,29 +248,7 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* Toggle 2 */}
-            <div 
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '0.5rem 0' }}
-              onClick={() => toggleDarkMode(!darkMode)}
-            >
-              <div>
-                <p style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>Dark Mode</p>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>Enable dark theme across the entire dashboard.</p>
-              </div>
-              <div 
-                style={{
-                  width: '50px', height: '28px', backgroundColor: darkMode ? 'var(--accent-primary)' : 'var(--border-color)',
-                  borderRadius: '20px', position: 'relative', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-                }}
-              >
-                <div style={{
-                  width: '24px', height: '24px', backgroundColor: 'white', borderRadius: '50%',
-                  position: 'absolute', top: '2px', left: darkMode ? '24px' : '2px',
-                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', 
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-                }}></div>
-              </div>
-            </div>
+
 
           </div>
         </div>
@@ -265,10 +269,8 @@ export default function Settings() {
             onMouseDown={(e) => !isSaving && (e.currentTarget.style.transform = 'translateY(0) scale(0.98)')}
             onMouseUp={(e) => !isSaving && (e.currentTarget.style.transform = 'translateY(-2px) scale(1)')}
           >
-            {isSaving ? (
+            {isSaving && (
               <span style={{ display: 'inline-block', width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'currentColor', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             )}
             {isSaving ? 'Saving...' : 'Save Settings'}
           </button>
@@ -403,7 +405,7 @@ export default function Settings() {
           <span style={{ 
             fontSize: '0.7rem', fontWeight: '700', padding: '0.25rem 0.625rem', borderRadius: '6px',
             backgroundColor: 'rgba(34,197,94,0.1)', color: '#22c55e', letterSpacing: '0.05em'
-          }}>v1.0.0</span>
+          }}>v2.0.0</span>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>SmartWarehouse Dashboard</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -445,17 +447,17 @@ export default function Settings() {
               onMouseOver={e => { e.currentTarget.style.backgroundColor = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
               onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#ef4444'; }}
               onClick={async () => { 
-                if(!confirm('⚠️ Are you sure?\n\nThis will permanently delete ALL detection logs from the database. This action cannot be undone.')) return;
+                if(!confirm('Are you sure?\n\nThis will permanently delete ALL detection logs from the database. This action cannot be undone.')) return;
                 try {
                   const res = await fetch('/api/logs', { method: 'DELETE', headers: { 'Authorization': `Bearer ${authToken}` }});
                   const data = await res.json();
                   if (res.ok) {
                     setLogs([]);
-                    setToastMsg('✅ ' + (data.message || 'All logs cleared.'));
+                    setToastMsg(data.message || 'All logs cleared successfully.');
                   } else {
-                    setToastMsg('⚠️ ' + (data.detail || 'Failed to clear logs.'));
+                    setToastMsg('Error: ' + (data.detail || 'Failed to clear logs.'));
                   }
-                } catch { setToastMsg('⚠️ Server error. Could not clear logs.'); }
+                } catch { setToastMsg('Error: Server error. Could not clear logs.'); }
                 setTimeout(() => setToastMsg(''), 4000);
               }}
             >
@@ -475,18 +477,17 @@ export default function Settings() {
               onMouseOver={e => { e.currentTarget.style.backgroundColor = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
               onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#ef4444'; }}
               onClick={async () => { 
-                if(!confirm('Reset all settings to factory defaults?\n\nCamera URL → 0\nThreshold → 85%\nNotifications → On\nDark Mode → Off')) return;
+                if(!confirm('Reset all settings to factory defaults?\n\nCamera URL: 0\nThreshold: 50%\nNotifications: On')) return;
                 try {
                   const res = await fetch('/api/settings/reset', { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }});
                   const data = await res.json();
                   if (res.ok) {
-                    setCameraUrl('0'); setThreshold(85); setNotifications(true);
-                    toggleDarkMode(false);
-                    setToastMsg('✅ ' + (data.message || 'Settings restored to defaults.'));
+                    setCameraUrl('0'); setThreshold(50); setNotifications(true);
+                    setToastMsg(data.message || 'Settings restored to defaults.');
                   } else {
-                    setToastMsg('⚠️ ' + (data.detail || 'Failed to reset settings.'));
+                    setToastMsg('Error: ' + (data.detail || 'Failed to reset settings.'));
                   }
-                } catch { setToastMsg('⚠️ Server error. Could not reset settings.'); }
+                } catch { setToastMsg('Error: Server error. Could not reset settings.'); }
                 setTimeout(() => setToastMsg(''), 4000);
               }}
             >

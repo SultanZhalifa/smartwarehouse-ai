@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.gitignore
+*.md
+__pycache__
+*.pyc
+.env
+backend/warehouse.db
+backend/__pycache__
+backend/tests
+docs
