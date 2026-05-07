@@ -42,23 +42,34 @@ const Icons = {
 /* ─── Count-Up Animation Hook ─── */
 function useCountUp(target, duration = 1200) {
   const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const hasAnimated = useRef(false);
+  const animRef = useRef(null);
+  const prevTarget = useRef(0);
 
   useEffect(() => {
-    if (!target || hasAnimated.current) return;
-    hasAnimated.current = true;
-    const startTime = performance.now();
-    const animate = (now) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease-out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(parseFloat((eased * target).toFixed(2)));
-      if (progress < 1) ref.current = requestAnimationFrame(animate);
+    // Only animate if target actually changed to a valid number
+    if (target === prevTarget.current || typeof target !== 'number' || target <= 0) return;
+    prevTarget.current = target;
+
+    // Small delay to ensure component is mounted
+    const timeout = setTimeout(() => {
+      const startTime = performance.now();
+      const animate = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease-out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(parseFloat((eased * target).toFixed(2)));
+        if (progress < 1) {
+          animRef.current = requestAnimationFrame(animate);
+        }
+      };
+      animRef.current = requestAnimationFrame(animate);
+    }, 50);
+
+    return () => {
+      clearTimeout(timeout);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
     };
-    ref.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(ref.current);
   }, [target, duration]);
 
   return count;

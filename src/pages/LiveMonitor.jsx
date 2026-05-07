@@ -92,7 +92,7 @@ export default function LiveMonitor() {
         .then(data => {
           setStatus(data.status || "Active");
           setAiData({ 
-            speed: (data.ai_performance?.inference_time || 0) + "ms", 
+            speed: (data.ai_performance?.inference_time || 0) > 0 ? data.ai_performance.inference_time + "ms" : "Idle", 
             model: data.ai_performance?.model || "YOLO11" 
           });
           setActiveZones(data.active_zones || []);
