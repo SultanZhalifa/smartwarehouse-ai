@@ -66,6 +66,12 @@ def init_db():
         if "must_change_password" not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0")
 
+        # Logs table migrations
+        cursor.execute("PRAGMA table_info(logs)")
+        log_columns = [col[1] for col in cursor.fetchall()]
+        if "snapshot_path" not in log_columns:
+            cursor.execute("ALTER TABLE logs ADD COLUMN snapshot_path TEXT DEFAULT ''")
+
         # Backfill username from email local-part for legacy rows
         cursor.execute("SELECT id, email FROM users WHERE username IS NULL OR username = ''")
         for row in cursor.fetchall():

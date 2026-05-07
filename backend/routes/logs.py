@@ -5,12 +5,13 @@ CRUD operations for detection logs, CSV export,
 and public-facing latest detections endpoint.
 """
 
+import os
 import io
 import time
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
 
 from config import verify_token, active_sessions
 from database import get_db
@@ -30,13 +31,13 @@ def get_logs(
         cursor = conn.cursor()
         if zone:
             cursor.execute(
-                "SELECT id, type, location, date, time, confidence, risk "
+                "SELECT id, type, location, date, time, confidence, risk, snapshot_path "
                 "FROM logs WHERE location LIKE ? ORDER BY id DESC LIMIT ?",
                 (f"%{zone}%", limit),
             )
         else:
             cursor.execute(
-                "SELECT id, type, location, date, time, confidence, risk "
+                "SELECT id, type, location, date, time, confidence, risk, snapshot_path "
                 "FROM logs ORDER BY id DESC LIMIT ?",
                 (limit,),
             )
@@ -46,6 +47,7 @@ def get_logs(
         {
             "id": r[0], "type": r[1], "location": r[2],
             "date": r[3], "time": r[4], "confidence": r[5], "risk": r[6],
+            "snapshot": f"/api/snapshots/{r[7]}" if r[7] else None,
         }
         for r in rows
     ]
@@ -162,3 +164,21 @@ def clear_logs(auth: bool = Depends(verify_token)):
         conn.cursor().execute("DELETE FROM logs")
 
     return {"status": "success", "message": "All detection logs cleared."}
+
+
+# ─── Serve Detection Snapshots ───
+SNAPSHOT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "snapshots")
+
+
+@router.get("/snapshots/{filename}")
+def get_snapshot(filename: str):
+    """Serve a detection snapshot image."""
+    # Security: prevent directory traversal
+    if ".." in filename or "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    filepath = os.path.join(SNAPSHOT_DIR, filename)
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="Snapshot not found")
+
+    return FileResponse(filepath, media_type="image/jpeg")

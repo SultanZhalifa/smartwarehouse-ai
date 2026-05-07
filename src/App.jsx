@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import AcceptInvite from './pages/AcceptInvite';
 import ChangePassword from './pages/ChangePassword';
 import UserManagement from './pages/UserManagement';
+import AIPerformance from './pages/AIPerformance';
 import RequireRole from './components/RequireRole';
 import { WarehouseProvider } from './context/WarehouseContext';
 import { ToastProvider } from './components/ToastNotification';
@@ -49,6 +50,14 @@ function App() {
                 element={
                   <RequireRole roles={['admin']}>
                     <UserManagement />
+                  </RequireRole>
+                }
+              />
+              <Route
+                path="ai-performance"
+                element={
+                  <RequireRole roles={['admin', 'manager']}>
+                    <AIPerformance />
                   </RequireRole>
                 }
               />

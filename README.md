@@ -204,9 +204,12 @@ We trained a custom YOLO11 model (`warehouse_pest.pt`) on curated datasets from 
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/login` | - | User authentication |
-| `POST` | `/api/register` | - | New user registration |
+| `POST` | `/api/login` | - | User authentication (username + password) |
+| `POST` | `/api/logout` | Bearer | End user session |
+| `POST` | `/api/change-password` | Bearer | Change current password |
 | `GET` | `/api/verify-token` | Bearer | Token validation |
+| `POST` | `/api/invite-user` | Admin | Generate user invitation link |
+| `POST` | `/api/accept-invite` | - | Accept invitation and create account |
 | `POST` | `/api/forgot-password` | - | OTP code generation |
 | `POST` | `/api/reset-password` | - | Password reset with OTP |
 | `GET` | `/api/settings` | - | Get system settings |
@@ -217,11 +220,14 @@ We trained a custom YOLO11 model (`warehouse_pest.pt`) on curated datasets from 
 | `GET` | `/api/export/logs` | Token | CSV export |
 | `GET` | `/api/analytics` | Bearer | Trend & distribution data |
 | `GET` | `/api/status` | Bearer | System status |
-| `POST` | `/api/camera/toggle` | Bearer | Start/stop camera |
-| `GET` | `/api/video_feed` | - | MJPEG video stream |
+| `POST` | `/api/cameras/{zone_id}/toggle` | Bearer | Start/stop zone camera |
+| `GET` | `/api/cameras/{zone_id}/snapshot` | Bearer | Capture zone frame |
+| `GET` | `/api/video_feed/{zone_id}` | - | Per-zone MJPEG stream |
+| `GET` | `/api/video_feed` | - | Legacy Zone A stream |
 | `WS` | `/api/ws/alerts` | - | Real-time alert notifications |
 | `GET` | `/api/health` | - | System health check (Docker) |
-| `GET` | `/api/model-info` | - | AI model metadata & capabilities |
+| `GET` | `/api/model-info` | - | AI model metadata, training metrics & mAP |
+| `GET` | `/api/training-artifacts/{name}` | - | Training images (confusion matrix, etc.) |
 
 > Full interactive API documentation: http://127.0.0.1:8000/docs
 

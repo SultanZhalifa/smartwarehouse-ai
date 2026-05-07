@@ -27,6 +27,10 @@ from services.tts import speak_async
 
 router = APIRouter(prefix="/api", tags=["Camera"])
 
+# ─── Snapshot Storage ───
+SNAPSHOT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "snapshots")
+os.makedirs(SNAPSHOT_DIR, exist_ok=True)
+
 
 # ─── Per-Zone Worker State ───
 class ZoneWorker:
@@ -39,6 +43,7 @@ class ZoneWorker:
         self.thread = None
         self.stop_flag = threading.Event()
         self.latest_frame_bytes = None
+        self.latest_annotated_frame = None  # Keep annotated frame for snapshots
         self.latest_inference_ms = 0
         self.last_detection_per_class = {}
         self.lock = threading.Lock()
@@ -172,25 +177,46 @@ class ZoneWorker:
             last = self.last_detection_per_class.get(class_name, 0.0)
             if now - last > DETECTION_COOLDOWN_SECONDS:
                 self.last_detection_per_class[class_name] = now
-                self._log_detection(class_name, conf)
+                self._pending_log = (class_name, conf)
 
             x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
             draw_hud_bounding_box(annotated, x1, y1, x2, y2, class_name, conf)
 
+        # Save annotated frame reference for snapshot capture
+        self.latest_annotated_frame = annotated
+
+        # Log after drawing all bounding boxes (so snapshot includes all detections)
+        if hasattr(self, '_pending_log') and self._pending_log:
+            cls, cnf = self._pending_log
+            self._pending_log = None
+            self._log_detection(cls, cnf, annotated)
+
         return annotated
 
-    def _log_detection(self, class_name: str, conf: float):
-        """Persist detection to DB and broadcast WebSocket alert."""
+    def _log_detection(self, class_name: str, conf: float, annotated_frame=None):
+        """Persist detection to DB, save snapshot, and broadcast WebSocket alert."""
         risk_info = get_risk_info(class_name)
         risk_level = risk_info["level"]
         log_id = 0
+        snapshot_path = ""
+
+        # Save detection snapshot
+        if annotated_frame is not None:
+            try:
+                ts = time.strftime("%Y%m%d_%H%M%S")
+                filename = f"{ts}_{class_name}_{self.zone_id}.jpg"
+                filepath = os.path.join(SNAPSHOT_DIR, filename)
+                cv2.imwrite(filepath, annotated_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
+                snapshot_path = filename
+            except Exception as snap_err:
+                print(f"[SNAPSHOT-ERROR] {snap_err}")
 
         try:
             with get_db() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO logs (type, location, date, time, confidence, risk) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO logs (type, location, date, time, confidence, risk, snapshot_path) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
                     (
                         class_name,
                         self.zone_name,
@@ -198,6 +224,7 @@ class ZoneWorker:
                         time.strftime("%H:%M:%S"),
                         f"{int(conf * 100)}%",
                         risk_level,
+                        snapshot_path,
                     ),
                 )
                 log_id = cursor.lastrowid

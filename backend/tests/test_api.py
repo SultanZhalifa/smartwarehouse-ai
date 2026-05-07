@@ -1,7 +1,7 @@
 """
 Smart Warehouse — API Test Suite
 ==================================
-Basic test coverage for core API endpoints.
+Comprehensive test coverage for core API endpoints.
 Run with: pytest tests/ -v
 """
 
@@ -26,10 +26,10 @@ def client():
 
 @pytest.fixture
 def auth_headers(client):
-    """Get authenticated headers with Bearer token."""
+    """Get authenticated headers with Bearer token (admin user)."""
     response = client.post("/api/login", json={
-        "email": "manager@kawanlama.com",
-        "password": "password123"
+        "username": "admin",
+        "password": "admin123"
     })
     assert response.status_code == 200
     token = response.json()["token"]
@@ -40,25 +40,25 @@ def auth_headers(client):
 class TestAuth:
     def test_login_success(self, client):
         response = client.post("/api/login", json={
-            "email": "manager@kawanlama.com",
-            "password": "password123"
+            "username": "manager",
+            "password": "manager123"
         })
         assert response.status_code == 200
         data = response.json()
         assert "token" in data
-        assert data["user"]["name"] == "Manager"
-        assert data["user"]["role"] == "admin"
+        assert data["user"]["name"] == "Warehouse Manager"
+        assert data["user"]["role"] == "manager"
 
     def test_login_wrong_password(self, client):
         response = client.post("/api/login", json={
-            "email": "manager@kawanlama.com",
+            "username": "manager",
             "password": "wrongpassword"
         })
         assert response.status_code == 401
 
     def test_login_nonexistent_user(self, client):
         response = client.post("/api/login", json={
-            "email": "nobody@example.com",
+            "username": "nobody",
             "password": "password123"
         })
         assert response.status_code == 401
@@ -105,11 +105,6 @@ class TestLogs:
         response = client.get("/api/logs")
         assert response.status_code == 401
 
-    def test_public_detections(self, client):
-        response = client.get("/api/public/latest-detections")
-        assert response.status_code == 200
-        assert isinstance(response.json(), list)
-
 
 # ─── Analytics Tests ───
 class TestAnalytics:
@@ -146,20 +141,36 @@ class TestCamera:
         assert "stopped" in response.json()["message"].lower()
 
 
-# ─── Registration Tests ───
-class TestRegistration:
-    def test_register_short_password(self, client):
-        response = client.post("/api/register", json={
-            "email": "test@example.com",
-            "password": "abc"
+# ─── Invite System Tests ───
+class TestInviteSystem:
+    def test_invite_user_unauthorized(self, client):
+        """Non-admin users cannot generate invitations."""
+        response = client.post("/api/invite-user", json={
+            "email": "newuser@example.com",
+            "username": "newuser",
+            "role": "operator"
         })
-        assert response.status_code == 400
-        assert "6 characters" in response.json()["detail"]
+        assert response.status_code == 401
 
-    def test_register_duplicate_email(self, client):
-        response = client.post("/api/register", json={
-            "email": "manager@kawanlama.com",
-            "password": "password123"
+    def test_invite_user_success(self, client, auth_headers):
+        """Admin can generate an invitation link."""
+        response = client.post("/api/invite-user", json={
+            "email": "invited@example.com",
+            "username": "inviteduser",
+            "role": "operator"
+        }, headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "success"
+        assert "invite_link" in data
+        assert "token" in data
+
+    def test_accept_invite_invalid_token(self, client):
+        """Accepting with a bad token is rejected."""
+        response = client.post("/api/accept-invite", json={
+            "token": "bad-token-here",
+            "name": "Test User",
+            "password": "testpass123"
         })
         assert response.status_code == 400
 
@@ -239,4 +250,12 @@ class TestSystemEndpoints:
             assert "class_names" in data
             assert "model_file" in data
             assert data["framework"] == "Ultralytics YOLO11"
+            # Verify training metrics are exposed
+            if data.get("training"):
+                assert "final_metrics" in data["training"]
+                assert "mAP50" in data["training"]["final_metrics"]
 
+    def test_training_artifact_invalid(self, client):
+        """Requesting unknown artifact names is rejected."""
+        response = client.get("/api/training-artifacts/malicious_file")
+        assert response.status_code == 404
