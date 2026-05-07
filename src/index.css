@@ -117,8 +117,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px -5px rgba(0,0,0,0.04), 0 25px 40px -10px rgba(0,0,0,0.03);
+  transform: translateY(-4px);
+  border-color: var(--accent-primary);
+  box-shadow:
+    0 12px 30px -5px rgba(15, 23, 42, 0.08),
+    0 25px 40px -10px rgba(15, 23, 42, 0.05);
+}
+
+body.dark-mode .card:hover {
+  border-color: var(--accent-primary);
+  box-shadow:
+    0 12px 30px -5px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(59, 130, 246, 0.15);
 }
 
 .logo {
@@ -146,13 +156,31 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
+  position: relative;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-link.active {
-  background-color: var(--text-primary);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-hover) 100%);
   color: var(--bg-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.25);
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--accent-primary);
+  border-radius: 0 3px 3px 0;
+}
+
+body.dark-mode .nav-link.active::before {
+  background: var(--accent-primary);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
 }
 
 .nav-link.inactive {
@@ -916,4 +944,159 @@ body.dark-mode .login-submit {
     flex-direction: column;
     justify-content: center;
   }
+}
+
+/* ─── Page Transitions ─── */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: pageEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Inline Spinner (small) ─── */
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--text-primary);
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Command Palette ─── */
+.cmdk-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  animation: pageEnter 0.18s ease-out;
+}
+
+.cmdk-panel {
+  width: min(92vw, 600px);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 30px 60px -10px rgba(2, 6, 23, 0.35);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cmdk-input {
+  width: 100%;
+  padding: 1.125rem 1.25rem;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  font-family: var(--font-family);
+  background: transparent;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cmdk-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.cmdk-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.cmdk-item.active,
+.cmdk-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.cmdk-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.cmdk-item.active .cmdk-item-icon {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+.cmdk-item-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.cmdk-item-sub {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.cmdk-shortcut {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+}
+
+.cmdk-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.625rem 1rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.cmdk-empty {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useWarehouse } from '../context/WarehouseContext';
+import CommandPalette from '../components/CommandPalette';
 
 const ROLE_BADGE_COLORS = {
   admin:    { bg: 'rgba(239, 68, 68, 0.15)', fg: '#dc2626', label: 'Admin' },
@@ -12,6 +13,7 @@ export default function DashboardLayout() {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const { alerts, logout, authToken, user, hasRole } = useWarehouse();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!authToken) {
@@ -36,8 +38,12 @@ export default function DashboardLayout() {
 
   const badge = ROLE_BADGE_COLORS[user?.role] || { bg: 'var(--bg-tertiary)', fg: 'var(--text-secondary)', label: user?.role || '—' };
 
+  const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
+
   return (
     <div className="app-container">
+      <CommandPalette />
+
       {/* Real-Time Toast Notifications */}
       <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 9999, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {alerts.map((alert) => (
@@ -45,7 +51,8 @@ export default function DashboardLayout() {
             backgroundColor: alert.risk === 'danger' ? 'var(--alert-danger-bg)' : 'var(--alert-warning-bg)',
             border: `1px solid ${alert.risk === 'danger' ? 'var(--alert-danger)' : 'var(--alert-warning)'}`,
             padding: '1rem 1.5rem', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-            animation: 'fadeIn 0.3s ease-out', display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '300px'
+            animation: 'toastSlideIn 0.4s cubic-bezier(0.21, 1.02, 0.73, 1)',
+            display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '300px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: alert.risk === 'danger' ? 'var(--alert-danger)' : 'var(--alert-warning)' }}>
               {alert.risk === 'danger' ? (
@@ -118,6 +125,33 @@ export default function DashboardLayout() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Command palette trigger */}
+            <button
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }))}
+              title={`Quick search (${isMac ? '⌘' : 'Ctrl'}+K)`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.5rem 0.75rem', backgroundColor: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-color)', borderRadius: '8px',
+                color: 'var(--text-secondary)', cursor: 'pointer',
+                fontSize: '0.8125rem', fontWeight: '500',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <span>Quick search</span>
+              <span style={{
+                fontSize: '0.7rem', padding: '0.1rem 0.35rem',
+                background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
+                borderRadius: '4px', fontFamily: 'SFMono-Regular, Consolas, monospace',
+                color: 'var(--text-secondary)',
+              }}>{isMac ? '⌘K' : 'Ctrl+K'}</span>
+            </button>
+
             {/* User info + role badge */}
             {user && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', padding: '0.375rem 0.75rem 0.375rem 0.5rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
@@ -145,7 +179,9 @@ export default function DashboardLayout() {
 
         {/* Dynamic Page Content Rendered Here */}
         <div className="dashboard-content">
-          <Outlet />
+          <div key={location.pathname} className="page-transition">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

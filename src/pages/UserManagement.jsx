@@ -137,10 +137,32 @@ export default function UserManagement() {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading users…</td></tr>
+              <tr>
+                <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.625rem' }}>
+                    <span className="spinner-sm" />
+                    <span>Loading users…</span>
+                  </div>
+                </td>
+              </tr>
             )}
             {!loading && users.length === 0 && !error && (
-              <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found.</td></tr>
+              <tr>
+                <td colSpan={6} style={{ padding: '3.5rem 2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <div>
+                      <p style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', margin: '0 0 0.375rem' }}>No users yet</p>
+                      <p style={{ fontSize: '0.8125rem', margin: 0, maxWidth: '320px' }}>Click <strong>Add User</strong> or <strong>Invite User</strong> above to get started.</p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
             )}
             {!loading && users.map(u => {
               const isSelf = currentUser && u.username === currentUser.username;
