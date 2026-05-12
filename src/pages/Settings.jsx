@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWarehouse } from '../context/WarehouseContext';
-import { useToast } from '../ToastNotification';
+import { useToast } from '../components/ToastNotification';
 import { useT } from '../hooks/useT';
 import CameraSettings from '../components/settings/CameraSettings';
 import PreferencesSettings from '../components/settings/PreferencesSettings';
