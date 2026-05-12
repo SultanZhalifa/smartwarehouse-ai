@@ -138,76 +138,77 @@ def _get_today_stats(cursor) -> dict:
 # ── Response builders ──────────────────────────────────────────────────────
 
 def _fmt_risk_label(risk: str) -> str:
-    return {"danger": "🔴 BIO-HAZARD", "warning": "🟡 KONTAMINASI", "info": "🟢 MONITORING"}.get(risk, risk.upper())
+    return {"danger": "[BIO-HAZARD]", "warning": "[KONTAMINASI]", "info": "[MONITORING]"}.get(risk, risk.upper())
 
 
 def _build_response(intent: str, cursor) -> str:
     if intent == "help":
         return (
-            "🤖 **AI Warehouse Assistant** siap membantu!\n\n"
+            "**AI Warehouse Assistant** siap membantu!\n\n"
             "Saya bisa menjawab pertanyaan seperti:\n"
-            "• *\"Zona mana yang paling berbahaya?\"*\n"
-            "• *\"Berapa total deteksi ular minggu ini?\"*\n"
-            "• *\"Kapan terakhir ada insiden?\"*\n"
-            "• *\"Jam berapa paling sering ada deteksi?\"*\n"
-            "• *\"Buatkan ringkasan laporan keamanan\"*\n\n"
-            "Silakan tanyakan apa saja tentang keamanan gudang! 💬"
+            "• \"Zona mana yang paling berbahaya?\"\n"
+            "• \"Berapa total deteksi ular minggu ini?\"\n"
+            "• \"Kapan terakhir ada insiden?\"\n"
+            "• \"Jam berapa paling sering ada deteksi?\"\n"
+            "• \"Buatkan ringkasan laporan keamanan\"\n\n"
+            "Silakan tanyakan apa saja tentang keamanan gudang."
         )
 
     if intent == "total_stats":
         s = _get_stats(cursor)
         today = _get_today_stats(cursor)
         return (
-            f"📊 **Statistik Deteksi Keseluruhan**\n\n"
+            f"**Statistik Deteksi Keseluruhan**\n\n"
             f"• Total seluruh waktu: **{s['total']} deteksi**\n"
             f"• Hari ini: **{today['total']} deteksi** ({today['danger']} bahaya)\n\n"
             f"**Breakdown per kategori:**\n"
-            f"• 🔴 Bio-Hazard (Ular): {s['danger']} kejadian\n"
-            f"• 🟡 Kontaminasi (Kucing): {s['warning']} kejadian\n"
-            f"• 🟢 Monitoring (Gecko/Lizard): {s['info']} kejadian"
+            f"• [BAHAYA] Bio-Hazard (Ular): {s['danger']} kejadian\n"
+            f"• [SEDANG] Kontaminasi (Kucing): {s['warning']} kejadian\n"
+            f"• [AMAN] Monitoring (Gecko/Lizard): {s['info']} kejadian"
         )
 
     if intent == "zone_risk":
         zones = _get_zone_stats(cursor)
         if not zones:
-            return "ℹ️ Belum ada data deteksi di database. Jalankan kamera untuk mulai monitoring."
+            return "Belum ada data deteksi di database. Jalankan kamera untuk mulai monitoring."
         most = zones[0]
         safest = zones[-1] if len(zones) > 1 else None
-        lines = [f"🗺️ **Analisis Risiko Per Zona**\n"]
+        lines = ["**Analisis Risiko Per Zona**\n"]
         for z in zones:
             risk_pct = int((z["danger"] / z["total"]) * 100) if z["total"] > 0 else 0
-            bar = "🔴" * min(5, z["total"]) if z["danger"] > 0 else "🟢"
-            lines.append(f"• **{z['zone']}**: {z['total']} deteksi ({risk_pct}% bahaya) {bar}")
-        lines.append(f"\n⚠️ **Paling berbahaya: {most['zone']}** dengan {most['danger']} insiden Bio-Hazard")
+            level = "[BAHAYA]" if z["danger"] > 0 else "[AMAN]"
+            lines.append(f"• **{z['zone']}**: {z['total']} deteksi ({risk_pct}% bahaya) {level}")
+        lines.append(f"\n**Paling berbahaya: {most['zone']}** — {most['danger']} insiden Bio-Hazard")
         if safest:
-            lines.append(f"✅ **Paling aman: {safest['zone']}**")
+            lines.append(f"**Paling aman: {safest['zone']}**")
         return "\n".join(lines)
 
     if intent == "peak_hours":
         peaks = _get_peak_hours(cursor)
         if not peaks:
-            return "ℹ️ Belum cukup data historis untuk analisis pola waktu."
-        lines = ["⏰ **Analisis Jam Puncak Risiko**\n",
+            return "Belum cukup data historis untuk analisis pola waktu."
+        ranks = ["#1", "#2", "#3"]
+        lines = ["**Analisis Jam Puncak Risiko**\n",
                  "Berdasarkan data historis, deteksi paling sering terjadi pada:\n"]
-        medals = ["🥇", "🥈", "🥉"]
         for i, p in enumerate(peaks):
-            lines.append(f"{medals[i]} **{p['hour']}** — {p['count']} deteksi")
-        lines.append("\n💡 **Rekomendasi:** Tingkatkan patroli manual pada jam-jam tersebut.")
+            lines.append(f"{ranks[i]} **{p['hour']}** — {p['count']} deteksi")
+        lines.append("\n**Rekomendasi:** Tingkatkan patroli manual pada jam-jam tersebut.")
         return "\n".join(lines)
 
     if intent == "last_detection":
         det = _get_last_detection(cursor)
         if not det:
-            return "✅ Belum ada deteksi tercatat dalam sistem. Gudang masih bersih!"
+            return "Belum ada deteksi tercatat dalam sistem. Gudang masih bersih."
         risk_label = _fmt_risk_label(det["risk"])
+        action = "Segera lakukan evakuasi dan pemeriksaan zona!" if det["risk"] == "danger" else "Lakukan sanitasi dan pemeriksaan rutin."
         return (
-            f"🔍 **Deteksi Terakhir:**\n\n"
+            f"**Deteksi Terakhir:**\n\n"
             f"• Objek: **{det['type']}**\n"
             f"• Status: {risk_label}\n"
             f"• Lokasi: **{det['location']}**\n"
             f"• Waktu: {det['date']} pukul {det['time']}\n"
             f"• Confidence AI: **{det['confidence']}**\n\n"
-            f"{'🚨 Segera lakukan evakuasi dan pemeriksaan zona!' if det['risk'] == 'danger' else '⚠️ Lakukan sanitasi dan pemeriksaan rutin.'}"
+            f"{action}"
         )
 
     if intent == "count_snake":
@@ -217,53 +218,56 @@ def _build_response(intent: str, cursor) -> str:
         cursor.execute(
             "SELECT COUNT(*) FROM logs WHERE LOWER(type)='snake' AND date=?", (today,))
         today_count = cursor.fetchone()[0]
-        severity = "🔴 **KRITIS**" if count > 5 else "🟡 Terpantau"
+        severity = "[KRITIS]" if count > 5 else "[TERPANTAU]"
+        tail = "Ular adalah ancaman Bio-Hazard tertinggi. Pastikan protokol evakuasi siap." if count > 0 else "Tidak ada deteksi ular sejauh ini."
         return (
-            f"🐍 **Statistik Deteksi Ular (Bio-Hazard)**\n\n"
+            f"**Statistik Deteksi Ular — Bio-Hazard**\n\n"
             f"• Total keseluruhan: **{count} kejadian**\n"
             f"• Hari ini: **{today_count} kejadian**\n"
             f"• Tingkat bahaya: {severity}\n\n"
-            f"{'🚨 Ular adalah ancaman Bio-Hazard tertinggi! Pastikan protokol evakuasi siap.' if count > 0 else '✅ Tidak ada deteksi ular sejauh ini.'}"
+            f"{tail}"
         )
 
     if intent == "count_cat":
         cursor.execute("SELECT COUNT(*) FROM logs WHERE LOWER(type)='cat'")
         count = cursor.fetchone()[0]
+        tail = "Kucing dapat mengontaminasi produk gudang. Lakukan sanitasi rutin." if count > 0 else "Tidak ada deteksi kucing sejauh ini."
         return (
-            f"🐱 **Statistik Deteksi Kucing (Kontaminasi)**\n\n"
+            f"**Statistik Deteksi Kucing — Kontaminasi**\n\n"
             f"• Total deteksi: **{count} kejadian**\n"
-            f"• Kategori risiko: 🟡 KONTAMINASI\n\n"
-            f"{'⚠️ Kucing dapat mengontaminasi produk gudang. Lakukan sanitasi rutin.' if count > 0 else '✅ Tidak ada deteksi kucing sejauh ini.'}"
+            f"• Kategori risiko: [SEDANG] KONTAMINASI\n\n"
+            f"{tail}"
         )
 
     if intent == "count_gecko":
         cursor.execute(
             "SELECT COUNT(*) FROM logs WHERE LOWER(type) IN ('gecko','lizard')")
         count = cursor.fetchone()[0]
+        tail = "Periksa celah masuk di area yang sering terdeteksi." if count > 0 else "Tidak ada deteksi gecko/lizard sejauh ini."
         return (
-            f"🦎 **Statistik Deteksi Gecko/Lizard (Monitoring)**\n\n"
+            f"**Statistik Deteksi Gecko/Lizard — Monitoring**\n\n"
             f"• Total deteksi: **{count} kejadian**\n"
-            f"• Kategori risiko: 🟢 MONITORING\n\n"
-            f"{'ℹ️ Periksa celah masuk di area yang sering terdeteksi.' if count > 0 else '✅ Tidak ada deteksi gecko/lizard sejauh ini.'}"
+            f"• Kategori risiko: [RENDAH] MONITORING\n\n"
+            f"{tail}"
         )
 
     if intent == "safety_status":
         s = _get_stats(cursor)
         today = _get_today_stats(cursor)
         if today["danger"] > 0:
-            status = "🔴 WASPADA TINGGI"
-            advice = "Ada insiden Bio-Hazard hari ini! Segera koordinasikan penanganan."
+            status = "WASPADA TINGGI"
+            advice = "Ada insiden Bio-Hazard hari ini. Segera koordinasikan penanganan."
         elif s["danger"] > 0:
-            status = "🟡 WASPADA SEDANG"
+            status = "WASPADA SEDANG"
             advice = "Ada riwayat insiden Bio-Hazard. Pantau terus seluruh zona."
         else:
-            status = "🟢 AMAN"
+            status = "AMAN"
             advice = "Tidak ada ancaman terdeteksi. Pertahankan monitoring rutin."
         return (
-            f"🛡️ **Status Keamanan Gudang: {status}**\n\n"
+            f"**Status Keamanan Gudang: [{status}]**\n\n"
             f"• Insiden hari ini: {today['total']} deteksi\n"
             f"• Total historis: {s['total']} deteksi\n\n"
-            f"💡 {advice}"
+            f"{advice}"
         )
 
     if intent == "summary":
@@ -273,32 +277,35 @@ def _build_response(intent: str, cursor) -> str:
         today = _get_today_stats(cursor)
         most_zone = zones[0]["zone"] if zones else "N/A"
         last_info = f"{det['type']} di {det['location']} ({det['time']})" if det else "Tidak ada"
-        risk_level = "🔴 TINGGI" if s["danger"] > 2 else "🟡 SEDANG" if s["danger"] > 0 else "🟢 RENDAH"
+        risk_level = "[TINGGI]" if s["danger"] > 2 else "[SEDANG]" if s["danger"] > 0 else "[RENDAH]"
+        tail = "Tindakan segera diperlukan. Koordinasikan dengan tim keamanan." if s["danger"] > 0 else "Kondisi gudang dalam batas aman. Lanjutkan monitoring rutin."
         return (
-            f"📋 **Ringkasan Laporan Keamanan Gudang**\n"
-            f"*Digenerate: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}*\n\n"
-            f"**📊 Statistik:**\n"
+            f"**Ringkasan Laporan Keamanan Gudang**\n"
+            f"Digenerate: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}\n\n"
+            f"**Statistik:**\n"
             f"• Total deteksi: {s['total']} | Hari ini: {today['total']}\n"
             f"• Bio-Hazard: {s['danger']} | Kontaminasi: {s['warning']} | Monitoring: {s['info']}\n\n"
-            f"**🗺️ Zona Paling Aktif:** {most_zone}\n"
-            f"**🔍 Deteksi Terakhir:** {last_info}\n"
-            f"**⚡ Level Risiko Keseluruhan:** {risk_level}\n\n"
-            f"{'🚨 Tindakan segera diperlukan! Koordinasikan dengan tim keamanan.' if s['danger'] > 0 else '✅ Kondisi gudang dalam batas aman. Lanjutkan monitoring rutin.'}"
+            f"**Zona Paling Aktif:** {most_zone}\n"
+            f"**Deteksi Terakhir:** {last_info}\n"
+            f"**Level Risiko Keseluruhan:** {risk_level}\n\n"
+            f"{tail}"
         )
 
     # Unknown
     return (
-        "🤔 Maaf, saya belum memahami pertanyaan tersebut.\n\n"
+        "Maaf, saya belum memahami pertanyaan tersebut.\n\n"
         "Coba tanyakan:\n"
-        "• *\"Zona mana paling berbahaya?\"*\n"
-        "• *\"Berapa total deteksi?\"*\n"
-        "• *\"Kapan terakhir ada insiden?\"*\n"
-        "• *\"Buatkan ringkasan laporan\"*\n\n"
+        "• \"Zona mana paling berbahaya?\"\n"
+        "• \"Berapa total deteksi?\"\n"
+        "• \"Kapan terakhir ada insiden?\"\n"
+        "• \"Buatkan ringkasan laporan\"\n\n"
         "Atau ketik **\"bantuan\"** untuk melihat semua pertanyaan yang bisa dijawab."
     )
 
 
+
 # ── Endpoint ───────────────────────────────────────────────────────────────
+
 
 @router.post("/chat")
 def chat(req: ChatRequest, session=Depends(verify_token)):

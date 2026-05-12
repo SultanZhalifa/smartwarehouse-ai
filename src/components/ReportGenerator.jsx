@@ -89,7 +89,7 @@ export default function ReportGenerator({ onSuccess }) {
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       setColor(doc, HEX.primary);
-      doc.text('📋 Executive Summary', ML + 6, y + 9);
+      doc.text('Executive Summary', ML + 6, y + 9);
 
       const totalLogs = logs.length || 0;
       const dangerCount = logs.filter(l => l.risk === 'danger').length;
@@ -109,7 +109,7 @@ export default function ReportGenerator({ onSuccess }) {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       setColor(doc, riskColor);
-      doc.text(`⚡ LEVEL RISIKO KESELURUHAN: ${overallRisk}`, ML + 6, y + 36);
+      doc.text(`LEVEL RISIKO KESELURUHAN: ${overallRisk}`, ML + 6, y + 36);
 
       y += 52;
 
@@ -187,7 +187,7 @@ export default function ReportGenerator({ onSuccess }) {
         zones.slice(0, 5).forEach((z, idx) => {
           const zBarW = Math.max(2, (z.intensity / 100) * (CW - 55));
           const zColor = z.intensity > 60 ? HEX.danger : z.intensity > 30 ? HEX.warning : HEX.success;
-          const medal = ['🥇', '🥈', '🥉', '4.', '5.'][idx];
+          const medal = ['#1', '#2', '#3', '#4', '#5'][idx];
 
           doc.setFontSize(8.5);
           doc.setFont('helvetica', 'normal');
@@ -268,7 +268,7 @@ export default function ReportGenerator({ onSuccess }) {
       y += 8;
 
       if (peakHours.peak_hours?.length) {
-        const medals = ['🥇 Paling Sering', '🥈 Kedua', '🥉 Ketiga'];
+        const medals = ['#1 Paling Sering', '#2 Kedua', '#3 Ketiga'];
         peakHours.peak_hours.forEach((p, i) => {
           setFill(doc, i === 0 ? '#fef2f2' : i === 1 ? '#fffbeb' : '#f0fdf4');
           setDraw(doc, i === 0 ? '#fecaca' : i === 1 ? '#fde68a' : '#bbf7d0');
@@ -368,7 +368,7 @@ export default function ReportGenerator({ onSuccess }) {
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       setColor(doc, '#1d4ed8');
-      doc.text('💡 Rekomendasi Tindakan', ML + 6, y + 9);
+      doc.text('Rekomendasi Tindakan', ML + 6, y + 9);
 
       const recs = dangerCount > 0
         ? ['Segera aktifkan Protokol Evakuasi untuk zona dengan deteksi Bio-Hazard', 'Koordinasikan dengan tim pest control untuk pembasmian ular', 'Perketat akses masuk gudang terutama pada jam puncak risiko', 'Tingkatkan frekuensi patroli manual 2x lipat sampai ancaman teratasi']
@@ -395,11 +395,11 @@ export default function ReportGenerator({ onSuccess }) {
       // ── Save ──
       const filename = `Warehouse_Report_${now.toISOString().slice(0, 10)}.pdf`;
       doc.save(filename);
-      onSuccess?.(`✅ Report "${filename}" berhasil digenerate!`);
+      onSuccess?.(`Report "${filename}" berhasil digenerate!`);
 
     } catch (err) {
       console.error('PDF generation failed:', err);
-      onSuccess?.('❌ Gagal generate report. Pastikan data tersedia.', 'danger');
+      onSuccess?.('Gagal generate report. Pastikan data tersedia.', 'danger');
     } finally {
       setLoading(false);
     }

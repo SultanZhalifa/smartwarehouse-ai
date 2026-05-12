@@ -67,7 +67,11 @@ export default function PeakHoursChart() {
           border: `1px solid ${nightRisk > 50 ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)'}`,
           fontSize: '0.8rem',
         }}>
-          <span style={{ fontSize: '1rem' }}>🌙</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>
+            </svg>
+          </div>
           <div>
             <div style={{ fontWeight: '700', color: nightRisk > 50 ? '#ef4444' : '#f59e0b' }}>
               {nightRisk}% Malam Hari
@@ -84,14 +88,14 @@ export default function PeakHoursChart() {
             const colors = ['#ef4444', '#f59e0b', '#22c55e'];
             const bgs = ['rgba(239,68,68,0.08)', 'rgba(245,158,11,0.08)', 'rgba(34,197,94,0.08)'];
             const borders = ['rgba(239,68,68,0.2)', 'rgba(245,158,11,0.2)', 'rgba(34,197,94,0.2)'];
-            const medals = ['🥇', '🥈', '🥉'];
+            const ranks = ['01', '02', '03'];
             const labels = ['Paling Berbahaya', 'Kedua', 'Ketiga'];
             return (
               <div key={i} style={{
                 padding: '1rem', borderRadius: '12px', textAlign: 'center',
                 backgroundColor: bgs[i], border: `1px solid ${borders[i]}`,
               }}>
-                <div style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>{medals[i]}</div>
+                <div style={{ fontWeight: '900', fontSize: '0.95rem', color: i === 0 ? HEX.danger : i === 1 ? HEX.warning : HEX.success, letterSpacing: '-0.05em', opacity: 0.6 }}>{ranks[i]}</div>
                 <div style={{ fontSize: '1.5rem', fontWeight: '800', color: colors[i], letterSpacing: '-0.025em' }}>{p.hour}</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '600', marginTop: '0.2rem' }}>{labels[i]}</div>
                 <div style={{ fontSize: '0.75rem', color: colors[i], fontWeight: '700', marginTop: '0.25rem' }}>{p.count} deteksi</div>
@@ -100,7 +104,7 @@ export default function PeakHoursChart() {
           })}
           {data.peak_hours.length === 0 && (
             <div style={{ gridColumn: '1 / -1', padding: '1.5rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem', backgroundColor: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-              📊 Belum cukup data historis untuk prediksi jam puncak.
+              Belum cukup data historis untuk prediksi jam puncak.
             </div>
           )}
         </div>
@@ -137,8 +141,9 @@ export default function PeakHoursChart() {
       {/* Zone peaks */}
       {data.zone_peaks?.length > 0 && (
         <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
-          <p style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
-            ⚡ Prediksi Risiko Per Zona
+          <p style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Prediksi Risiko Per Zona
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
             {data.zone_peaks.map((z) => {
