@@ -89,7 +89,7 @@ const BotAvatar = ({ size = 34 }) => (
     boxShadow: size > 40 ? '0 4px 16px rgba(59,130,246,0.25)' : 'none',
   }}>
     <img
-      src="/icon ask ai.png"
+      src="/ask ai.svg"
       alt="AI Assistant"
       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
     />
