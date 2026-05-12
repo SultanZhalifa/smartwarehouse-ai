@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWarehouse } from '../context/WarehouseContext';
+import { useToast } from '../ToastNotification';
 import { useT } from '../hooks/useT';
 import CameraSettings from '../components/settings/CameraSettings';
 import PreferencesSettings from '../components/settings/PreferencesSettings';
@@ -25,13 +26,13 @@ const TEAM = [
 export default function Settings() {
   const { authToken, darkMode, toggleDarkMode, setLogs, language, changeLanguage } = useWarehouse();
   const t = useT();
+  const { addToast } = useToast();
 
   const [cameraUrl, setCameraUrl] = useState('0');
   const [cameraZone, setCameraZone] = useState('Zone A');
   const [threshold, setThreshold] = useState(50);
   const [notifications, setNotifications] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [toastMsg, setToastMsg] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -48,19 +49,17 @@ export default function Settings() {
 
   const handleSave = async () => {
     if (cameraUrl !== '0' && cameraUrl !== '1' && !cameraUrl.match(/^(rtsp|http|https):\/\//) && !cameraUrl.match(/\.(mp4|avi|mov|mkv)$/i)) {
-      setToastMsg(t.settings.invalidCamera);
-      setTimeout(() => setToastMsg(''), 5000);
+      addToast(t.settings.invalidCamera, 'error');
       return;
     }
     setIsSaving(true);
     try {
       const res = await api.postJson('/settings', { cameraUrl, cameraZone, threshold, notifications, darkMode });
-      setToastMsg(res.message || t.settings.saveSuccess);
+      addToast(res.message || t.settings.saveSuccess, 'success');
     } catch (err) {
-      setToastMsg(err.message || t.settings.saveFailed);
+      addToast(err.message || t.settings.saveFailed, 'error');
     } finally {
       setIsSaving(false);
-      setTimeout(() => setToastMsg(''), 4000);
     }
   };
 
@@ -80,14 +79,6 @@ export default function Settings() {
 
   return (
     <div className="page-transition" style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '2rem' }}>
-
-      {/* Toast */}
-      {toastMsg && (
-        <div className="settings-toast">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>{toastMsg}</span>
-        </div>
-      )}
 
       {/* Page title */}
       <div style={{ marginBottom: '2.5rem' }}>
