@@ -123,7 +123,10 @@ export default function AlertsPanel({ logs, t }) {
           );
         })}
         {filteredLogs.length === 0 && (
-          <div className="alerts-empty">
+          <div className="alerts-empty" style={{ minHeight: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem', opacity: 0.8 }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '0.75rem', opacity: 0.5 }}>
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
             {alertFilter === 'all' ? t.liveMonitor.noRecentAlerts : t.liveMonitor.noFilterAlerts?.replace('{filter}', alertFilter)}
           </div>
         )}
