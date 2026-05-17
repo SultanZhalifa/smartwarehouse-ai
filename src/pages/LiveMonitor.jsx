@@ -94,16 +94,29 @@ export default function LiveMonitor() {
     return () => clearInterval(interval);
   }, []);
 
-  // ── Toast on new detection ────────────────────────────────────
+  // ── Toast on new detection (dedup + cooldown) ────────────────
+  const lastToastTimeRef = React.useRef({}); // risk -> timestamp
   useEffect(() => {
     if (allLogs.length > prevLogCountRef.current && prevLogCountRef.current > 0) {
       const newLog = allLogs[0];
       const toastType = newLog.risk === 'danger' ? 'danger' : newLog.risk === 'warning' ? 'warning' : 'info';
-      addToast(`${newLog.type} detected at ${newLog.location} (${newLog.confidence} confidence)`, toastType);
-      setLastUpdated(new Date());
+      const now = Date.now();
+      const cooldown = toastType === 'danger' ? 8000 : 12000; // danger: 8s, warning/info: 12s
+      const lastTime = lastToastTimeRef.current[toastType] || 0;
+
+      // Only show toast if enough time has passed since last toast of same risk level
+      if (now - lastTime > cooldown) {
+        lastToastTimeRef.current[toastType] = now;
+        addToast(
+          `${newLog.type} detected at ${newLog.location} (${newLog.confidence})`,
+          toastType
+        );
+        setLastUpdated(new Date());
+      }
     }
     prevLogCountRef.current = allLogs.length;
   }, [allLogs.length]);
+
 
   const logs = allLogs.slice(0, 50);
 
