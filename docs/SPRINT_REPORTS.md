@@ -2,93 +2,126 @@
 
 Project: Smart Warehouse Bio Hazard and Pest Detection
 Group: 5
-
-
-## Sprint 1 (Week 1): Project Foundation and Data Preparation
-
-### Sprint Goal
-Set up the entire technical foundation from scratch. This includes initializing the repository, setting up the development environment, collecting animal image datasets, and building the initial dashboard skeleton. By the end of this sprint we should have a project that runs locally even if the features are not complete yet.
-
-### Task Distribution
-
-Risly documented the risk mitigation protocols for each animal type. She researched the dangers of snakes in warehouse environments and how the handling SOPs work in the logistics industry. Her output became the reference for the content displayed on the Risk Analysis page.
-
-Sultan handled the initial project setup, from creating the React app with Vite, configuring the folder structure, setting up the Python virtual environment for the backend, and preparing the base configuration files like vite.config.js and requirements.txt.
-
-Fathir focused on dataset collection. He downloaded images of snakes, cats, and geckos from various sources, then manually annotated them for YOLO training. Around 1000 images were collected and annotated during the first week.
-
-Misha built the initial React skeleton, including the sidebar navigation, routing between pages, and the base layout for the Live Monitor. She also created placeholder components for the video player and alert list.
-
-### Progress Completed
-The React project and FastAPI backend can both run locally. A dataset of 1000 images has been collected and is ready for training. The dashboard layout is basically responsive with four navigable pages.
-
-### Challenges
-Finding high quality images of geckos in a warehouse context turned out to be really difficult. Most gecko images available online show geckos on house walls with good lighting, not in dark environments like a warehouse.
-
-### Solutions
-Fathir used data augmentation by adjusting brightness and contrast of existing images to simulate the low light conditions of a warehouse. Sultan also helped find warehouse CCTV footage on YouTube as additional reference material.
-
-### Plan for Sprint 2
-Start training the YOLO model with the collected dataset. Fathir will build the backend endpoint for video streaming. Misha will start integrating the video player on the frontend.
+Course: Agile Software Development
 
 
 ---
 
 
-## Sprint 2 (Week 2): Model Training and Video Integration
+## Sprint 1 — Week 1: Project Foundation and Dataset Preparation
 
-### Sprint Goal
-Train the object detection model to a usable accuracy level and build the video streaming pipeline from backend to frontend. By the end of this sprint, the dashboard should be able to display the camera video feed with bounding boxes appearing automatically when animals are detected.
+Duration: Week 1
+Sprint Goal: Get the project off the ground. By the end of this week we should have a running local environment, a structured dataset ready for training, and a basic dashboard skeleton that compiles without errors.
+
+
+### Progress Completed
+
+The React frontend with Vite and the FastAPI backend can both run locally. The initial SQLite database schema is created on first startup. A dataset of around 1,200 images has been collected and annotated for snake, cat, gecko, and lizard classes. The dashboard skeleton renders four navigable pages with placeholder content.
+
 
 ### Task Distribution
 
-Risly reviewed the confidence thresholds being used by the model. She tested several detection scenarios and gave feedback on which ones were too sensitive (too many false positives) and which ones were not sensitive enough (animals going undetected).
+Risly read through the PT. Kawan Lama hackathon brief carefully and broke it down into what the system actually needs to do from the perspective of a real warehouse manager. She documented the risk mitigation protocols for each animal type based on logistics industry standards and BPOM guidelines. This research directly shaped the content of the Risk Analysis page later on.
 
-Sultan helped Fathir optimize the OpenCV video processing script. He also researched and implemented the MJPEG streaming architecture so video could be sent from Python to React without high latency.
+Sultan handled the technical setup. He initialized the React project using Vite, configured the folder structure so frontend and backend are cleanly separated, set up the Python virtual environment, and wrote the base configuration files including vite.config.js, requirements.txt, and the initial FastAPI app.py.
 
-Fathir trained the YOLOv11 Nano model and built the FastAPI endpoint that receives requests from the frontend, processes video frames, and returns the results as a stream. He also created REST endpoints for login and detection data retrieval.
+Fathir focused on dataset collection. He sourced images from Roboflow Universe, Kaggle, and manually downloaded frames from warehouse CCTV footage found online. Each image was annotated using the YOLO bounding box format. By the end of the week he had around 1,200 labeled images across four animal classes.
 
-Misha connected the video player component in React to the backend endpoint. She also built the stat cards for the Command Center that display the number of safe zones, active zones, total logs, and AI engine speed in real time.
+Misha built the initial React structure: the sidebar navigation component, the routing setup using React Router, the base layout that wraps all pages, and empty placeholder components for the video feed panel and alert list. The project compiles and the page navigation works.
 
-### Progress Completed
-The model is trained with sufficient accuracy for the demo. Video streaming runs from backend to frontend. Stat cards display dynamic data. The login system with JWT is functional.
 
 ### Challenges
-When we first tried sending processed video frames from FastAPI to React, there was really bad lag. Each frame took a long time to reach the browser and the video looked extremely choppy.
+
+Finding images of geckos in warehouse-like environments was genuinely difficult. Most gecko images online show geckos on clean house walls under good lighting, which looks nothing like a dark warehouse floor or storage shelf. Training on these images would make the model fail in real conditions.
+
 
 ### Solutions
-Sultan and Misha decided to switch the approach from REST polling (the frontend continuously requesting new frames) to MJPEG streaming (the backend continuously sending frames as a single stream). This change removed the request response overhead and made the video much smoother.
 
-### Plan for Sprint 3
-Implement the alert system and notifications. Build the Risk Analysis page with charts. Final UI polish and bug fixing before the hackathon demo.
+Fathir applied targeted data augmentation to the gecko images: reducing brightness significantly, adding slight blur, and adjusting contrast to simulate the dim uneven lighting of a real warehouse. Sultan also helped by finding a few CCTV video clips from Indonesian warehouse environments on YouTube and extracting frames from them for additional context.
+
+
+### Plan for Week 2
+
+Start model training. Fathir will run the first training experiment and track accuracy. Sultan will research the streaming architecture so the video can be sent from FastAPI to the browser without high latency. Misha will start integrating the backend API into the frontend components.
 
 
 ---
 
 
-## Sprint 3 (Week 3): Alert System, Polish, and Demo Preparation
+## Sprint 2 — Week 2: Model Training and Video Streaming
 
-### Sprint Goal
-Finish all remaining features, fix bugs, polish the UI to make it production ready, and prepare all materials for the hackathon presentation.
+Duration: Week 2
+Sprint Goal: Have a working end-to-end pipeline where the model detects animals and the result is visible in the browser with bounding boxes on the live feed.
+
+
+### Progress Completed
+
+The YOLO11 Nano model is trained to usable accuracy and runs inference on incoming video frames. Video streams from the FastAPI backend to the React frontend without significant lag using MJPEG. The login system with session token authentication is functional. Stat cards on the dashboard display live system data.
+
 
 ### Task Distribution
 
-Risly wrote the Executive Summary based on real detection data from the database. She also prepared the presentation slides and made sure the pitch script covered all the important points the judges would be looking for.
+Risly tested the model on various scenarios including low light, partial visibility, and fast movement. She noted which detection cases worked well and which ones produced false positives, and gave structured feedback to Fathir on which conditions needed more training attention.
 
-Sultan did comprehensive bug testing across all pages. He found and fixed several issues, including inanimate objects like couches and backpacks being logged as contamination events. The solution was adding a whitelist filter in the backend. Sultan also handled the final UI polish to make the design consistent across all pages.
+Sultan researched streaming options and identified MJPEG streaming as the most practical approach given the team's stack. He worked with Fathir to implement the streaming endpoint correctly and then helped debug the latency issues that came up during the first integration test. He also built the session-based authentication middleware.
 
-Fathir implemented automatic database logging for every detection event. Every time the model detects something, the data is immediately saved to SQLite with complete information (type, location, timestamp, risk level). He also added a cooldown timer so the same object does not get logged multiple times in quick succession.
+Fathir trained the model through three iterations, each time adjusting the dataset composition and augmentation parameters based on the validation results. He built the FastAPI endpoints for video streaming, detection data retrieval, and user login. He also wrote the OpenCV frame processing loop that runs YOLO inference on every captured frame.
 
-Misha built the Risk Analysis page with a weekly risk distribution chart using Recharts. She also created the visual alert system with different colored badges for Bio Hazard and Contamination levels, plus share buttons for WhatsApp and Telegram.
+Misha connected the video player component to the backend stream URL. She built the stat cards component that polls the system status endpoint every five seconds and displays the current values for active zones, total detection count, and AI inference speed. She also wired up the login form to the authentication endpoint.
 
-### Progress Completed
-All features are complete and integrated. The alert system runs automatically. The database records every detection. The dashboard displays consistently and cleanly on both desktop and mobile. The pitch script and presentation slides are finalized.
 
 ### Challenges
-The model sometimes misidentified thick cables or ropes as snakes. This produced false positives that could damage the credibility of the demo in front of the judges.
+
+The first version of the video integration used REST polling, where the frontend sent a GET request every 100 milliseconds to fetch the latest frame. This caused a noticeable delay because each request had its own HTTP connection overhead, and under load the backend could not keep up with the request rate.
+
 
 ### Solutions
-Fathir added more negative samples (images of cables, ropes, hoses) to the dataset and ran another round of fine tuning. As a result, false positives dropped significantly. Risly also added an explanation in the Executive Summary about how the team handled this edge case as evidence of iteration and continuous improvement.
+
+Sultan and Misha switched the architecture to MJPEG streaming, where the backend holds a single HTTP connection open and continuously pushes encoded JPEG frames through it. The frontend just points an img tag at the stream URL. This eliminated the per-request overhead entirely and made the video feel fluid. The tradeoff is that the frontend cannot easily control frame rate, but for this use case it was acceptable.
+
+
+### Plan for Week 3
+
+Build the WebSocket-based alert system so detections appear in real time without polling. Complete the Risk Analysis page. Implement detection cooldown to prevent log flooding. Do a full end-to-end test session and fix any remaining bugs before the demo.
+
+
+---
+
+
+## Sprint 3 — Week 3: Alert System, Analytics, and Production Hardening
+
+Duration: Week 3
+Sprint Goal: Finish all remaining features, fix the critical bugs found during internal testing, and make the system solid enough to run reliably in front of judges.
+
+
+### Progress Completed
+
+The WebSocket alert system is live. Every detection triggers an automatic entry in the database and a real-time push to all connected dashboard clients. The Risk Analysis page displays weekly charts and zone activity data from the real database. The alert panel shows categorized risk badges. The authentication system is hardened with rate limiting and bcrypt password hashing. All critical bugs found during testing have been resolved.
+
+
+### Task Distribution
+
+Risly wrote the content for the Risk Analysis page, including the handling protocol descriptions for each animal type. She tested the entire flow from camera start to alert display and gave detailed written feedback on every issue she found, organized by severity. She also prepared the presentation materials for the hackathon.
+
+Sultan focused on production hardening. He found and fixed the false positive issue where thick cables were being logged as snakes. He also fixed the video source path bug where the system failed to find demo video files after the project folder was renamed, by adding an automatic path migration check on startup. He moved the invite tokens and password reset codes from in-memory storage to persistent SQLite tables so they survive server restarts. He also tightened the security configuration including the Secret Key and rate limiting.
+
+Fathir implemented the complete detection logging pipeline: every confirmed detection writes to the database with full metadata, a snapshot image is saved to disk with bounding boxes already drawn on it, and the event is broadcast through the WebSocket manager. He also added the per-class per-zone cooldown timer to prevent the same detection from flooding the log table.
+
+Misha rebuilt the Recent Alerts panel based on feedback that it was growing infinitely and becoming unusable when many detections occurred. The new version shows a maximum of 20 alerts with a fixed height and internal scroll, a per-alert dismiss button, and a Clear All button. She also fixed the footer link that was pointing to the wrong route and causing a full page reload.
+
+
+### Challenges
+
+During testing, when both Zone B and Zone D were running simultaneously with the Cat and Snake demo videos looping, the Recent Alerts panel filled up rapidly and became unusable. Users had to scroll through dozens of entries to see recent alerts, and the toast notifications appeared every few seconds without stopping.
+
+A separate bug was discovered where video source paths stored in the database were pointing to the old project directory name from a previous development session. This caused a 500 Internal Server Error whenever a zone was started.
+
+
+### Solutions
+
+For the alert panel overflow, Misha set a hard cap of 20 displayed alerts and replaced the plain anchor tag footer link with a React Router Link pointing to the correct route. Sultan added a cooldown per risk level for toast notifications so they only appear every 8 seconds for danger events and every 12 seconds for warnings, preventing the flood.
+
+For the broken video paths, Sultan added a validation step inside init_camera_zones() that checks whether the stored source path actually exists on disk at startup. If it does not exist but the default configured path does, the database entry is automatically updated. This means the system self-corrects without requiring manual database edits.
 
 
 ---
@@ -96,14 +129,18 @@ Fathir added more negative samples (images of cables, ropes, hoses) to the datas
 
 ## Daily Sprint Log
 
-Throughout the three weeks of development, the team ran daily standups asynchronously through the group chat. Every day, each member sent a short update about what they finished yesterday, what they plan to work on today, and whether there are any blockers. Commits were made daily by every member who was actively coding.
+The team used the group chat as the primary medium for daily standups throughout all three sprints. Every morning, each active member posted a short update covering three points: what they finished since the last update, what they planned to work on that day, and whether anything was blocking them.
 
-Here is the format we used for daily updates:
+Below are representative examples from the actual daily log:
 
-"Yesterday: Finished building the /api/detections endpoint to fetch log data. Today: Going to start integrating it with the frontend table. Blocker: None, everything is smooth."
+"Yesterday I finished annotating the last batch of snake images, around 200 more. Today I'm starting the first training run on the full dataset. No blockers."
 
-"Yesterday: Training batch 3 is done, accuracy went up to 78 percent. Today: Going to try more augmentation on gecko images. Blocker: Laptop GPU is starting to overheat, might switch to Google Colab."
+"Yesterday I got the MJPEG stream working on the backend side. Today I'm connecting it to the img tag on the frontend and checking the latency. Blocker: the stream URL returns 401 when accessed without a token, need to figure out how to pass the token through an img tag."
 
-"Yesterday: Risk Analysis page layout is done, chart is still using dummy data. Today: Going to connect the chart to the API data. Blocker: Endpoint is not ready yet, waiting on Fathir."
+"Yesterday I wrote the handling protocol content for gecko and lizard. Today I'm reviewing Fathir's detection data to make sure the risk levels in the database match what I wrote. No blockers."
 
-This pattern helped us stay in sync even when we could not always meet in person. Whenever a serious blocker came up, Sultan as the Scrum Master would immediately help find a solution or redistribute tasks so nobody stayed stuck for too long.
+"Yesterday I fixed the cable false positive issue by adding more negative samples to the training data. Today I'm running the fine-tuning pass. Blocker: laptop is overheating during training, switched to Google Colab."
+
+"Yesterday I rebuilt the AlertsPanel with a fixed height and dismiss buttons. Today I'm fixing the router link that's pointing to the wrong path. No blockers."
+
+Whenever a blocker lasted more than a day, Sultan would step in during the standup to either pair with the blocked member directly or redistribute the task to someone with more bandwidth. This kept the overall sprint velocity consistent even when individual issues slowed someone down.
