@@ -61,14 +61,18 @@ export default function DetectionLogs() {
   const handleExportCSV = async () => {
     setIsExporting(true);
     try {
-      const res = await api.get('/export/logs');
+      // /export/logs auth uses ?token= query param (can't send headers on blob downloads)
+      const token = localStorage.getItem('sw_token') || '';
+      const res = await fetch(`/api/export/logs?token=${token}`);
       if (!res.ok) throw new Error('Export failed');
       const csvText = await res.text();
       const today = new Date().toISOString().slice(0, 10);
       const a = document.createElement('a');
       a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvText);
       a.download = `warehouse-logs-${today}.csv`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       addToast(t.detectionLogs.exportSuccess, 'info');
     } catch {
       addToast(t.detectionLogs.exportFailed, 'danger');
